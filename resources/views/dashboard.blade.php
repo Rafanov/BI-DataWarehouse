@@ -3,541 +3,827 @@
 
 @push('styles')
 <style>
-    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-    .kpi-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 16px 18px;
-        position: relative;
-        overflow: hidden;
-    }
-    .kpi-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; }
-    .kpi-card.blue::before { background:var(--accent); }
-    .kpi-card.green::before { background:#10b981; }
-    .kpi-card.orange::before { background:#f59e0b; }
-    .kpi-card.purple::before { background:#8b5cf6; }
-    .kpi-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-muted); margin-bottom:6px; }
-    .kpi-value { font-size:26px; font-weight:700; font-family:'DM Mono',monospace; letter-spacing:-1px; color:var(--text-primary); line-height:1; }
-    .kpi-sub { font-size:11px; color:var(--text-muted); margin-top:4px; }
-    .kpi-icon { position:absolute; top:14px; right:14px; width:30px; height:30px; border-radius:7px; display:flex; align-items:center; justify-content:center; }
-
-    .charts-row { display:grid; gap:12px; margin-bottom:12px; }
-    .charts-row.cols-2 { grid-template-columns:1fr 1fr; }
-    .charts-row.cols-3 { grid-template-columns:1fr 1fr 1fr; }
-    .charts-row.cols-31 { grid-template-columns:2fr 1fr; }
-
-    .chart-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px; box-shadow:var(--shadow-sm); }
-    .chart-box-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
-    .chart-box-title { font-size:12px; font-weight:600; color:var(--text-primary); }
-    .chart-box-sub { font-size:10px; color:var(--text-muted); margin-top:2px; }
-    .chart-tag { font-size:9px; font-weight:600; padding:2px 7px; border-radius:100px; background:var(--accent-light); color:var(--accent); white-space:nowrap; }
-
-    .dataset-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:100px; font-size:11px; font-weight:500; background:var(--bg); border:1px solid var(--border); color:var(--text-secondary); margin-right:5px; margin-bottom:5px; }
-    .dataset-pill .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-
-    .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
-    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-    .empty-state { text-align:center; padding:60px 20px; }
-    .empty-state-icon { font-size:40px; margin-bottom:12px; }
-    .empty-state-title { font-size:15px; font-weight:600; color:var(--text-primary); margin-bottom:6px; }
-    .empty-state-sub { font-size:12px; color:var(--text-muted); }
-
-    .ticker-bar { background:var(--text-primary); border-radius:var(--radius); padding:8px 16px; display:flex; align-items:center; gap:16px; margin-bottom:16px; overflow:hidden; }
-    .ticker-label { font-size:9px; font-weight:700; letter-spacing:1px; color:var(--accent); text-transform:uppercase; white-space:nowrap; }
-    .ticker-wrap { overflow:hidden; flex:1; }
-    .ticker-items { display:flex; gap:32px; animation:ticker 25s linear infinite; white-space:nowrap; width:max-content; }
-    .ticker-item { font-size:11px; font-family:'DM Mono',monospace; color:#e2e8f0; }
-    .ticker-item span { color:#10b981; margin-left:5px; }
-    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-
-    /* Insight box */
-    .insight-bar {
+    /* ── KPI GRID ── */
+    .kpi-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-bottom: 12px;
-    }
-    .insight-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 14px 16px;
-        display: flex;
-        align-items: flex-start;
+        grid-template-columns: repeat(5, 1fr);
         gap: 12px;
+        margin-bottom: 20px;
     }
-    .insight-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
-    .insight-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 3px; }
-    .insight-value { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
-    .insight-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-card {
+        background: rgba(10,30,60,0.88);
+        border: 1px solid rgba(56,189,248,0.14);
+        border-radius: 14px;
+        padding: 16px 18px;
+        position: relative; overflow: hidden;
+        backdrop-filter: blur(16px);
+        transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(6,182,212,0.15); }
+    .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+    .kpi-card.b::before { background: linear-gradient(90deg,#0891b2,#06b6d4); }
+    .kpi-card.g::before { background: linear-gradient(90deg,#10b981,#34d399); }
+    .kpi-card.o::before { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+    .kpi-card.r::before { background: linear-gradient(90deg,#ef4444,#f87171); }
+    .kpi-card.p::before { background: linear-gradient(90deg,#8b5cf6,#a78bfa); }
+    .kpi-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; color:var(--text-muted); margin-bottom:7px; }
+    .kpi-value { font-size:26px; font-weight:700; font-family:'JetBrains Mono',monospace; letter-spacing:-1px; color:var(--text-primary); line-height:1; }
+    .kpi-sub   { font-size:11px; color:var(--text-muted); margin-top:5px; }
+    .kpi-icon  { position:absolute; top:14px; right:14px; font-size:20px; opacity:0.22; }
+
+    /* ── TICKER ── */
+    .ticker {
+        background: rgba(8,145,178,0.10);
+        border: 1px solid rgba(56,189,248,0.14);
+        border-radius: 9px; padding: 7px 14px;
+        display: flex; align-items: center; gap: 12px;
+        margin-bottom: 16px; overflow: hidden;
+    }
+    .tick-live { font-size:9px; font-weight:800; letter-spacing:1.2px; color:#38bdf8; text-transform:uppercase; flex-shrink:0; }
+    .tick-wrap { flex:1; overflow:hidden; }
+    .tick-inner { display:flex; gap:30px; white-space:nowrap; animation:tickScroll 22s linear infinite; width:max-content; }
+    .tick-item  { font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--text-secondary); }
+    .tick-item .up { color:#34d399; margin-left:4px; }
+    @keyframes tickScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    /* ── CHART ROWS ── */
+    .chart-row { display:grid; gap:12px; margin-bottom:12px; }
+    .chart-row.r21 { grid-template-columns:2fr 1fr; }
+    .chart-row.r3  { grid-template-columns:1fr 1fr 1fr; }
+    .chart-row.r31 { grid-template-columns:3fr 1fr; }
+
+    /* ── CHART BOX ── */
+    .cbox {
+        background: rgba(10,30,60,0.88);
+        border: 1px solid rgba(56,189,248,0.13);
+        border-radius: 14px; overflow: hidden;
+        backdrop-filter: blur(16px);
+    }
+    .cbox-head {
+        padding: 13px 18px;
+        border-bottom: 1px solid rgba(56,189,248,0.07);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .cbox-title { font-size:13px; font-weight:600; color:var(--text-primary); }
+    .cbox-sub   { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .cbox-tag {
+        font-size:9px; font-weight:700; padding:2px 8px; border-radius:20px;
+        background: rgba(56,189,248,0.12); color:#38bdf8; white-space:nowrap;
+    }
+    .cbox-body { padding:16px; }
+
+    /* ── GLOBE ── */
+    .globe-container {
+        position:relative; background:rgba(2,10,20,0.5);
+        border-radius:0 0 14px 14px; overflow:hidden;
+    }
+    canvas#globe3d { display:block; width:100%; cursor:grab; }
+    canvas#globe3d:active { cursor:grabbing; }
+    .globe-hint {
+        position:absolute; top:10px; left:50%; transform:translateX(-50%);
+        background:rgba(10,30,60,0.82); border:1px solid rgba(56,189,248,0.15);
+        border-radius:6px; padding:4px 12px;
+        font-size:11px; color:var(--text-muted);
+        backdrop-filter:blur(10px); white-space:nowrap; z-index:5;
+        transition:opacity 0.3s;
+    }
+    .globe-overlay {
+        position:absolute; bottom:10px; left:10px; right:10px;
+        display:flex; justify-content:space-between; align-items:flex-end;
+        pointer-events:none; z-index:5;
+    }
+    .globe-legend {
+        background:rgba(10,30,60,0.82); border:1px solid rgba(56,189,248,0.15);
+        border-radius:9px; padding:9px 11px; backdrop-filter:blur(10px);
+    }
+    .g-legend-title { font-size:9px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+    .g-legend-row   { display:flex; align-items:center; gap:6px; margin-bottom:3px; }
+    .g-legend-dot   { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .g-legend-lbl   { font-size:10px; color:var(--text-secondary); }
+
+    /* ── BAR CHART ── */
+    .bar-row    { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+    .bar-label  { font-size:11px; color:var(--text-secondary); width:84px; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; }
+    .bar-track  { flex:1; height:14px; background:rgba(56,189,248,0.07); border-radius:4px; overflow:hidden; }
+    .bar-fill   { height:100%; border-radius:4px; transition:width 1.2s cubic-bezier(.22,1,.36,1); }
+    .bar-val    { font-size:11px; color:var(--text-muted); width:40px; text-align:right; font-family:'JetBrains Mono',monospace; flex-shrink:0; }
+
+    /* ── DONUT ── */
+    .donut-wrap  { display:flex; align-items:center; gap:16px; }
+    .donut-items { flex:1; }
+    .donut-row   { display:flex; align-items:center; gap:7px; margin-bottom:9px; }
+    .donut-dot   { width:9px; height:9px; border-radius:3px; flex-shrink:0; }
+    .donut-lbl   { font-size:12px; color:var(--text-secondary); flex:1; }
+    .donut-pct   { font-size:12px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+
+    /* ── INSIGHT CARDS ── */
+    .insight-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+    .insight-card {
+        background: rgba(10,30,60,0.88);
+        border: 1px solid rgba(56,189,248,0.13);
+        border-radius: 12px; padding: 14px 16px;
+        display:flex; align-items:flex-start; gap:12px;
+        backdrop-filter: blur(16px);
+    }
+    .ins-icon { font-size:20px; flex-shrink:0; margin-top:2px; }
+    .ins-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:3px; }
+    .ins-val   { font-size:14px; font-weight:600; color:var(--text-primary); line-height:1.3; }
+    .ins-sub   { font-size:10px; color:var(--text-muted); margin-top:2px; }
+
+    /* ── TABLE ── */
+    .tbl-scroll { overflow-x:auto; }
+    .tbl-scroll table { width:100%; border-collapse:collapse; font-size:13px; }
+    .tbl-scroll thead th {
+        padding:9px 14px; text-align:left;
+        font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+        color:var(--text-muted); background:rgba(56,189,248,0.04);
+        border-bottom:1px solid rgba(56,189,248,0.09);
+    }
+    .tbl-scroll tbody td {
+        padding:11px 14px; border-bottom:1px solid rgba(56,189,248,0.06);
+        color:var(--text-secondary); font-family:'JetBrains Mono',monospace; font-size:12px;
+    }
+    .tbl-scroll tbody tr:last-child td { border-bottom:none; }
+    .tbl-scroll tbody tr:hover td { background:rgba(56,189,248,0.04); }
+    .tbadge { display:inline-block; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:700; }
+    .tbadge-r { background:rgba(239,68,68,0.18); color:#f87171; }
+    .tbadge-o { background:rgba(245,158,11,0.18); color:#fbbf24; }
+    .tbadge-g { background:rgba(16,185,129,0.18); color:#34d399; }
+
+    /* ── DATASET PILLS ── */
+    .ds-pills { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:18px; }
+    .ds-pill  {
+        display:inline-flex; align-items:center; gap:5px;
+        padding:4px 11px; border-radius:100px; font-size:12px; font-weight:500;
+        background:rgba(10,30,60,0.88); border:1px solid rgba(56,189,248,0.14);
+        color:var(--text-secondary);
+    }
+    .ds-pill .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align:center; padding:70px 20px; }
+    .empty-icon  { font-size:48px; margin-bottom:14px; }
+    .empty-title { font-size:18px; font-weight:600; color:var(--text-primary); margin-bottom:8px; }
+    .empty-sub   { font-size:14px; color:var(--text-muted); }
+
+    /* Skeleton loader */
+    .skel {
+        background: linear-gradient(90deg,rgba(56,189,248,0.06) 25%,rgba(56,189,248,0.10) 50%,rgba(56,189,248,0.06) 75%);
+        background-size:200% 100%;
+        animation:shimmer 1.6s infinite;
+        border-radius:10px;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 </style>
 @endpush
 
 @section('content')
 
-{{-- Ticker bar --}}
-<div class="ticker-bar" id="ticker-bar" style="display:none;">
-    <div class="ticker-label">LIVE</div>
-    <div class="ticker-wrap">
-        <div class="ticker-items" id="ticker-items"></div>
+{{-- TICKER --}}
+<div class="ticker" id="ticker-bar" style="display:none;">
+    <div class="tick-live">● LIVE</div>
+    <div class="tick-wrap">
+        <div class="tick-inner" id="ticker-items"></div>
     </div>
 </div>
-{{-- KPI Cards --}}
+
+{{-- KPI CARDS --}}
 <div class="kpi-grid">
-    <div class="kpi-card blue">
-        <div class="kpi-icon" style="background:#eff4ff;">
-            <svg width="18" height="18" fill="none" stroke="#2563eb" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7"/><ellipse cx="12" cy="7" rx="8" ry="4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
-        </div>
+    <div class="kpi-card b">
+        <div class="kpi-icon">🗄️</div>
         <div class="kpi-label">Total Datasets</div>
         <div class="kpi-value">{{ $totalDatasets }}</div>
-        <div class="kpi-sub">Across all uploads</div>
+        <div class="kpi-sub">Semua upload</div>
     </div>
-    <div class="kpi-card green">
-        <div class="kpi-icon" style="background:#ecfdf3;">
-            <svg width="18" height="18" fill="none" stroke="#10b981" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        </div>
+    <div class="kpi-card g">
+        <div class="kpi-icon">📋</div>
         <div class="kpi-label">Total Rows</div>
         <div class="kpi-value">{{ number_format($totalRows) }}</div>
         <div class="kpi-sub">Records indexed</div>
     </div>
-    <div class="kpi-card orange">
-        <div class="kpi-icon" style="background:#fff7ed;">
-            <svg width="18" height="18" fill="none" stroke="#f59e0b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-        </div>
+    <div class="kpi-card o">
+        <div class="kpi-icon">📐</div>
         <div class="kpi-label">Total Columns</div>
         <div class="kpi-value">{{ number_format($totalCols) }}</div>
         <div class="kpi-sub">Fields tracked</div>
     </div>
-    <div class="kpi-card purple">
-        <div class="kpi-icon" style="background:#f5f3ff;">
-            <svg width="18" height="18" fill="none" stroke="#8b5cf6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-        </div>
+    <div class="kpi-card r">
+        <div class="kpi-icon">📂</div>
+        <div class="kpi-label">Recent Datasets</div>
+        <div class="kpi-value">{{ $recentDatasets->count() }}</div>
+        <div class="kpi-sub">Dalam 5 upload terakhir</div>
+    </div>
+    <div class="kpi-card p">
+        <div class="kpi-icon">👤</div>
         <div class="kpi-label">Active User</div>
-        <div class="kpi-value">1</div>
-        <div class="kpi-sub">{{ auth()->user()->name }}</div>
+        <div class="kpi-value" style="font-size:18px;letter-spacing:0;">{{ Str::words(auth()->user()->name, 1, '') }}</div>
+        <div class="kpi-sub">{{ auth()->user()->email }}</div>
     </div>
 </div>
 
-{{-- Loading state --}}
+{{-- LOADING SKELETON --}}
 <div id="loading-state">
-    <div class="charts-row cols-2">
-        <div class="skeleton" style="height:320px;"></div>
-        <div class="skeleton" style="height:320px;"></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="skel" style="height:340px;"></div>
+        <div class="skel" style="height:340px;"></div>
     </div>
-    <div class="charts-row cols-3">
-        <div class="skeleton" style="height:260px;"></div>
-        <div class="skeleton" style="height:260px;"></div>
-        <div class="skeleton" style="height:260px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div class="skel" style="height:220px;"></div>
+        <div class="skel" style="height:220px;"></div>
+        <div class="skel" style="height:220px;"></div>
     </div>
 </div>
 
-{{-- Empty state --}}
+{{-- EMPTY STATE --}}
 <div id="empty-state" style="display:none;">
-    <div class="chart-box empty-state">
-        <div class="empty-state-icon">📊</div>
-        <div class="empty-state-title">No Data Yet</div>
-        <div class="empty-state-sub">Upload your first dataset to see the dashboard come alive.</div>
-        <a href="{{ route('datasets.create') }}" class="btn btn-primary" style="margin-top:20px;">+ Upload Dataset</a>
+    <div class="cbox">
+        <div class="empty-state">
+            <div class="empty-icon">🌊</div>
+            <div class="empty-title">Laut Data Masih Kosong</div>
+            <div class="empty-sub">Upload dataset CSV pertama kamu untuk melihat dashboard.</div>
+            <a href="{{ route('datasets.create') }}" class="btn btn-primary" style="margin-top:20px;">⬆ Upload Dataset</a>
+        </div>
     </div>
 </div>
 
-{{-- Dashboard content --}}
-<div id="dashboard-content" style="display:none;">
+{{-- DASHBOARD CONTENT --}}
+<div id="dash-content" style="display:none;">
 
-    {{-- Dataset pills --}}
-    <div style="margin-bottom:20px;" id="dataset-pills"></div>
+    {{-- Dataset Pills --}}
+    <div class="ds-pills" id="ds-pills"></div>
 
-    {{-- AI Insight bar (diisi JS) --}}
-    <div class="insight-bar" id="insight-bar"></div>
+    {{-- Insight Row --}}
+    <div class="insight-row" id="insight-row"></div>
 
-    {{-- Row 1: Main chart + Doughnut --}}
-    <div class="charts-row cols-31" id="row1"></div>
-
-    {{-- Row 2: 3 charts --}}
-    <div class="charts-row cols-3" id="row2"></div>
-
-    {{-- Row 3: 3 charts (FIXED: cols-3 bukan cols-2) --}}
-    <div class="charts-row cols-3" id="row3"></div>
-
-    {{-- Dataset table --}}
-    <div class="chart-box" style="margin-top:16px;">
-        <div class="chart-box-header">
-            <div>
-                <div class="chart-box-title">Dataset Registry</div>
-                <div class="chart-box-sub">All uploaded datasets</div>
+    {{-- ROW 1: Globe + Top chart --}}
+    <div class="chart-row r21" style="margin-bottom:12px;">
+        {{-- Globe --}}
+        <div class="cbox">
+            <div class="cbox-head">
+                <div>
+                    <div class="cbox-title">🌍 Globe 3D — Data dari Dataset CSV</div>
+                    <div class="cbox-sub">Titik = nilai kolom numerik · Drag untuk putar · Hover untuk detail</div>
+                </div>
+                <div class="cbox-tag">3D INTERACTIVE</div>
             </div>
-            <a href="{{ route('datasets.create') }}" class="btn btn-primary btn-sm">+ Upload</a>
+            <div class="globe-container">
+                <canvas id="globe3d" style="height:300px;"></canvas>
+                <div class="globe-hint" id="globe-hint">🖱️ Drag untuk memutar globe</div>
+                <div class="globe-overlay">
+                    <div class="globe-legend">
+                        <div class="g-legend-title">Nilai Data</div>
+                        <div class="g-legend-row"><div class="g-legend-dot" style="background:#ef4444;"></div><div class="g-legend-lbl">Tinggi</div></div>
+                        <div class="g-legend-row"><div class="g-legend-dot" style="background:#f59e0b;"></div><div class="g-legend-lbl">Sedang</div></div>
+                        <div class="g-legend-row"><div class="g-legend-dot" style="background:#10b981;"></div><div class="g-legend-lbl">Rendah</div></div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="table-wrap">
+
+        {{-- Top 10 bar --}}
+        <div class="cbox">
+            <div class="cbox-head">
+                <div>
+                    <div class="cbox-title" id="top10-title">Top Kategori</div>
+                    <div class="cbox-sub" id="top10-sub">dari dataset</div>
+                </div>
+                <div class="cbox-tag">RANK</div>
+            </div>
+            <div class="cbox-body" id="top10-bars"></div>
+        </div>
+    </div>
+
+    {{-- ROW 2: 3 charts --}}
+    <div class="chart-row r3" style="margin-bottom:12px;">
+        <div class="cbox">
+            <div class="cbox-head">
+                <div>
+                    <div class="cbox-title" id="c2-title">Chart 2</div>
+                    <div class="cbox-sub" id="c2-sub"></div>
+                </div>
+                <div class="cbox-tag">TREND</div>
+            </div>
+            <div class="cbox-body" style="padding:12px 16px;">
+                <canvas id="chart2" height="150"></canvas>
+            </div>
+        </div>
+        <div class="cbox">
+            <div class="cbox-head">
+                <div>
+                    <div class="cbox-title" id="c3-title">Chart 3</div>
+                    <div class="cbox-sub" id="c3-sub"></div>
+                </div>
+                <div class="cbox-tag">DIST</div>
+            </div>
+            <div class="cbox-body">
+                <div class="donut-wrap">
+                    <canvas id="chart3" width="100" height="100" style="flex-shrink:0;"></canvas>
+                    <div class="donut-items" id="donut-legend"></div>
+                </div>
+            </div>
+        </div>
+        <div class="cbox">
+            <div class="cbox-head">
+                <div>
+                    <div class="cbox-title" id="c4-title">Chart 4</div>
+                    <div class="cbox-sub" id="c4-sub"></div>
+                </div>
+                <div class="cbox-tag">BAR</div>
+            </div>
+            <div class="cbox-body" id="c4-bars"></div>
+        </div>
+    </div>
+
+    {{-- Dataset registry table --}}
+    <div class="cbox" style="margin-bottom:12px;">
+        <div class="cbox-head">
+            <div>
+                <div class="cbox-title">Dataset Registry</div>
+                <div class="cbox-sub">Semua dataset yang diupload</div>
+            </div>
+            <a href="{{ route('datasets.create') }}" class="btn btn-primary btn-sm">⬆ Upload</a>
+        </div>
+        <div class="tbl-scroll">
             <table>
                 <thead>
-                    <tr><th>#</th><th>Name</th><th>File</th><th>Rows</th><th>Columns</th><th>Uploaded</th><th></th></tr>
+                    <tr><th>#</th><th>Nama</th><th>File</th><th>Rows</th><th>Columns</th><th>Upload</th><th></th></tr>
                 </thead>
-                <tbody id="datasets-table-body"></tbody>
+                <tbody id="ds-table"></tbody>
             </table>
         </div>
     </div>
 
-</div>
-
+</div>{{-- /dash-content --}}
 @endsection
 
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-const PALETTE = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#84cc16','#ec4899','#14b8a6'];
-let chartInstances = {};
+/* ═══════════════════════════════════════════
+   PALETTE & HELPERS
+═══════════════════════════════════════════ */
+const PAL = ['#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#38bdf8','#f97316','#84cc16','#ec4899','#14b8a6'];
 
-function destroyAll() { Object.values(chartInstances).forEach(c=>c.destroy()); chartInstances={}; }
-
-function getChartOpts(type, color, extra={}) {
-    const isPie = ['pie','doughnut'].includes(type);
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 700, easing: 'easeInOutQuart' },
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-            legend: {
-                display: isPie,
-                position: 'bottom',
-                labels: { font:{size:9,family:'DM Sans'}, padding:8, boxWidth:8, usePointStyle:true }
-            },
-            tooltip: {
-                backgroundColor: '#0f172a',
-                titleColor: '#94a3b8',
-                bodyColor: '#f1f5f9',
-                titleFont: { size:10, family:'DM Sans', weight:'600' },
-                bodyFont: { size:11, family:'DM Mono' },
-                padding: 10, cornerRadius: 8,
-                borderColor: '#1e293b', borderWidth: 1,
-                callbacks: {
-                    label: ctx => ` ${ctx.dataset.label}: ${Number(ctx.parsed.y ?? ctx.parsed).toLocaleString()}`
-                }
-            }
-        },
-        scales: isPie ? {} : {
-            x: {
-                grid: { display:false },
-                border: { display:false },
-                ticks: { font:{size:9,family:'DM Sans'}, maxRotation:40, color:'#94a3b8', maxTicksLimit:10 }
-            },
-            y: {
-                beginAtZero: true,
-                grid: { color:'#f1f5f9' },
-                border: { display:false },
-                ticks: { font:{size:9,family:'DM Mono'}, color:'#94a3b8', maxTicksLimit:5 }
-            }
-        },
-        onClick: (e, els, chart) => {
-            if (!els.length) return;
-            const idx = els[0].index;
-            const meta = chart.getDatasetMeta(0);
-            meta.data.forEach((el, i) => {
-                el.options.backgroundColor = i === idx
-                    ? (isPie ? PALETTE[i] : color)
-                    : (isPie ? PALETTE[i]+'66' : color+'33');
-            });
-            chart.update('none');
-            setTimeout(() => {
-                meta.data.forEach((el, i) => {
-                    el.options.backgroundColor = isPie ? PALETTE[i]+'cc' : color+'25';
-                });
-                chart.update('none');
-            }, 1200);
-        },
-        ...extra
-    };
-}
-
-function makeChart(id, type, labels, values, label, color, extra={}) {
-    const ctx = document.getElementById(id);
-    if (!ctx) return null;
-    if (chartInstances[id]) { chartInstances[id].destroy(); }
-
-    const isPie = ['pie','doughnut'].includes(type);
-    const c = new Chart(ctx, {
-        type,
-        data: {
-            labels,
-            datasets: [{
-                label,
-                data: values,
-                backgroundColor: isPie ? PALETTE.map(c=>c+'cc') : color+'25',
-                borderColor: isPie ? PALETTE : color,
-                borderWidth: isPie ? 1.5 : 1.5,
-                borderRadius: type==='bar' ? 5 : 0,
-                tension: 0.4,
-                fill: extra.fill || false,
-                pointRadius: type==='line' ? 3 : 0,
-                pointHoverRadius: 5,
-                pointBackgroundColor: color,
-                hoverBorderWidth: 2,
-            }]
-        },
-        options: getChartOpts(type, color, extra.opts||{})
+function topN(records, xCol, yCol, n = 12) {
+    const agg = {};
+    records.forEach(r => {
+        const k = String(r[xCol] ?? '?').substring(0, 24);
+        const v = parseFloat(r[yCol]) || 0;
+        agg[k] = (agg[k] || 0) + v;
     });
-    chartInstances[id] = c;
-    return c;
-}
-
-function box(id, title, sub, tag, h=200, types=['bar','line','pie']) {
-    const toggleBtns = types.map(t =>
-        `<button onclick="toggleChart('${id}','${t}',this)" class="toggle-btn ${t==='bar'||t==='line'?'active':''}" data-type="${t}" style="padding:2px 7px;font-size:9px;font-weight:600;border:1px solid var(--border);border-radius:4px;background:${types[0]===t?'var(--accent)':'white'};color:${types[0]===t?'white':'var(--text-muted)'};cursor:pointer;transition:all 0.15s;">${t.toUpperCase()}</button>`
-    ).join('');
-    return `
-    <div class="chart-box" style="position:relative;">
-        <div class="chart-box-header">
-            <div>
-                <div class="chart-box-title">${title}</div>
-                <div class="chart-box-sub">${sub}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:4px;">
-                ${tag ? `<span class="chart-tag">${tag}</span>` : ''}
-                <div style="display:flex;gap:3px;margin-left:6px;" data-chart-id="${id}">${toggleBtns}</div>
-            </div>
-        </div>
-        <div style="position:relative;height:${h}px;"><canvas id="${id}"></canvas></div>
-    </div>`;
-}
-
-const chartDataStore = {};
-
-function toggleChart(id, newType, btn) {
-    const store = chartDataStore[id];
-    if (!store) return;
-    const container = btn.closest('[data-chart-id]');
-    container.querySelectorAll('.toggle-btn').forEach(b => {
-        const isActive = b.dataset.type === newType;
-        b.style.background = isActive ? 'var(--accent)' : 'white';
-        b.style.color = isActive ? 'white' : 'var(--text-muted)';
-        b.style.borderColor = isActive ? 'var(--accent)' : 'var(--border)';
-    });
-    makeChart(id, newType, store.labels, store.values, store.label, store.color, store.extra);
-}
-
-function storeAndMake(id, type, labels, values, label, color, extra={}) {
-    chartDataStore[id] = { labels, values, label, color, extra };
-    makeChart(id, type, labels, values, label, color, extra);
+    const sorted = Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, n);
+    return { labels: sorted.map(e => e[0]), values: sorted.map(e => +e[1].toFixed(4)) };
 }
 
 function detectCols(records, headers) {
     const num = [], cat = [];
     headers.forEach(h => {
-        const vals = records.slice(0,20).map(r=>r[h]).filter(v=>v!==''&&v!=null);
-        const n = vals.filter(v=>!isNaN(parseFloat(v))&&isFinite(v)&&v!=='').length;
-        if (n > vals.length*0.6) num.push(h); else cat.push(h);
+        const vals = records.slice(0, 30).map(r => r[h]).filter(v => v !== '' && v != null);
+        const n = vals.filter(v => !isNaN(parseFloat(v)) && isFinite(v) && v !== '').length;
+        (n > vals.length * 0.55 ? num : cat).push(h);
     });
     return { num, cat };
 }
 
-function topN(records, xCol, yCol, n=10) {
-    const agg = {};
-    records.forEach(r => {
-        const k = String(r[xCol]??'?').substring(0,22);
-        const v = parseFloat(r[yCol])||0;
-        if (v > 0) agg[k] = (agg[k]||0) + v;
-    });
-    const sorted = Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,n);
-    return { labels: sorted.map(e=>e[0]), values: sorted.map(e=>Math.round(e[1]*10000)/10000) };
-}
+/* ═══════════════════════════════════════════
+   GLOBE 3D
+═══════════════════════════════════════════ */
+function initGlobe(globeData) {
+    const canvas = document.getElementById('globe3d');
+    const ctx    = canvas.getContext('2d');
+    const DPR    = Math.min(devicePixelRatio, 2);
+    let W, H;
 
-// topN tanpa skip zero — untuk kolom yang semua nilainya kecil
-function topNAll(records, xCol, yCol, n=10) {
-    const agg = {};
-    records.forEach(r => {
-        const k = String(r[xCol]??'?').substring(0,22);
-        const v = parseFloat(r[yCol])||0;
-        agg[k] = (agg[k]||0) + v;
-    });
-    const sorted = Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,n);
-    return { labels: sorted.map(e=>e[0]), values: sorted.map(e=>Math.round(e[1]*10000)/10000) };
-}
+    function resize() {
+        W = canvas.offsetWidth;
+        H = canvas.offsetHeight;
+        canvas.width  = W * DPR;
+        canvas.height = H * DPR;
+        ctx.scale(DPR, DPR);
+    }
+    resize();
+    new ResizeObserver(resize).observe(canvas);
 
-function observeCharts() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
+    let rotX = 0.25, rotY = 0.3;
+    let drag = false, lastMX = 0, lastMY = 0;
+    let auto = true;
+    let hovered = null;
+
+    /* Country lat/lon database */
+    const COORDS = {
+        'China':[35,105],'Indonesia':[-5,120],'Philippines':[12,122],'Vietnam':[16,108],
+        'Sri Lanka':[7,81],'Thailand':[15,101],'Egypt':[27,30],'Malaysia':[4,108],
+        'Nigeria':[9,8],'Bangladesh':[24,90],'USA':[38,-97],'Brazil':[-15,-47],
+        'India':[20,78],'UK':[54,-2],'Germany':[51,10],'Japan':[36,138],
+        'Australia':[-27,133],'Mexico':[24,-102],'Argentina':[-34,-64],
+        'South Africa':[-30,25],'Canada':[56,-106],'Russia':[60,90],
+        'France':[46,2],'Italy':[42,12],'Spain':[40,-4],'Pakistan':[30,69],
+        'Turkey':[39,35],'South Korea':[36,128],'Iran':[32,53],'Saudi Arabia':[24,45],
+        'Colombia':[4,-73],'Peru':[-10,-76],'Chile':[-30,-71],'Algeria':[28,2],
+        'Morocco':[32,-5],'Kenya':[1,38],'Ghana':[8,-1],'Ethiopia':[9,40],
+        'Tanzania':[-6,35],'Myanmar':[17,96],'Cambodia':[12,105],'Nepal':[28,84],
+        'New Zealand':[-41,174],'Poland':[52,20],'Ukraine':[49,31],'Romania':[46,25],
+        'Netherlands':[52,5],'Belgium':[50,4],'Sweden':[60,15],'Norway':[60,8],
+        'Finland':[64,26],'Denmark':[56,10],'Portugal':[39,-8],'Greece':[39,22],
+        'Czech Republic':[50,15],'Hungary':[47,19],'Austria':[47,14],'Switzerland':[47,8],
+    };
+
+    /* Map first categorical column values to coords */
+    let pointData = [];
+    if (globeData && globeData.length) {
+        const maxV = Math.max(...globeData.map(d => d.value));
+        globeData.forEach(d => {
+            const coords = COORDS[d.label];
+            if (coords) {
+                pointData.push({
+                    label: d.label,
+                    value: d.value,
+                    lat: coords[0],
+                    lon: coords[1],
+                    norm: maxV > 0 ? d.value / maxV : 0
+                });
             }
         });
-    }, { threshold: 0.1 });
+    }
+    /* fallback: use some sample world points */
+    if (pointData.length === 0) {
+        Object.entries(COORDS).slice(0, 20).forEach(([label, [lat, lon]], i) => {
+            pointData.push({ label, value: Math.random() * 100, lat, lon, norm: Math.random() });
+        });
+    }
 
-    document.querySelectorAll('.chart-box').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(16px)';
-        el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-        observer.observe(el);
+    function latLon3D(lat, lon, r) {
+        const phi   = (90 - lat)  * Math.PI / 180;
+        const theta = (lon + 180) * Math.PI / 180;
+        return {
+            x: -r * Math.sin(phi) * Math.cos(theta),
+            y:  r * Math.cos(phi),
+            z:  r * Math.sin(phi) * Math.sin(theta)
+        };
+    }
+    function rotate(p, rx, ry) {
+        let { x, y, z } = p;
+        // Y-axis
+        let x1 = x * Math.cos(ry) + z * Math.sin(ry);
+        let z1 = -x * Math.sin(ry) + z * Math.cos(ry);
+        // X-axis
+        let y2 = y * Math.cos(rx) - z1 * Math.sin(rx);
+        let z2 = y * Math.sin(rx) + z1 * Math.cos(rx);
+        return { x: x1, y: y2, z: z2 };
+    }
+    function project(p, cx, cy, R) {
+        const sc = (R * 1.6) / (R * 1.6 + p.z * 0.25);
+        return { x: cx + p.x * sc, y: cy - p.y * sc, visible: p.z > -R * 0.08, z: p.z };
+    }
+    function normColor(n) {
+        if (n > 0.7) return { fill: '#ef4444', glow: 'rgba(239,68,68,0.4)' };
+        if (n > 0.4) return { fill: '#f59e0b', glow: 'rgba(245,158,11,0.3)' };
+        return { fill: '#10b981', glow: 'rgba(16,185,129,0.3)' };
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        const cx = W / 2, cy = H / 2;
+        const R  = Math.min(W, H) * 0.42;
+
+        /* Ocean gradient */
+        const g = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.3, 0, cx, cy, R);
+        g.addColorStop(0, '#0c4a6e');
+        g.addColorStop(0.55, '#064e6e');
+        g.addColorStop(1, '#021c2e');
+        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+        ctx.fillStyle = g; ctx.fill();
+
+        /* Grid */
+        ctx.strokeStyle = 'rgba(56,189,248,0.09)'; ctx.lineWidth = 0.5;
+        for (let lat = -75; lat <= 75; lat += 15) {
+            ctx.beginPath(); let first = true;
+            for (let lon = -180; lon <= 180; lon += 4) {
+                const rp = rotate(latLon3D(lat, lon, R), rotX, rotY);
+                const pp = project(rp, cx, cy, R);
+                if (pp.visible) { first ? ctx.moveTo(pp.x, pp.y) : ctx.lineTo(pp.x, pp.y); first = false; }
+                else first = true;
+            }
+            ctx.stroke();
+        }
+        for (let lon = -180; lon <= 180; lon += 30) {
+            ctx.beginPath(); let first = true;
+            for (let lat = -90; lat <= 90; lat += 4) {
+                const rp = rotate(latLon3D(lat, lon, R), rotX, rotY);
+                const pp = project(rp, cx, cy, R);
+                if (pp.visible) { first ? ctx.moveTo(pp.x, pp.y) : ctx.lineTo(pp.x, pp.y); first = false; }
+                else first = true;
+            }
+            ctx.stroke();
+        }
+
+        /* Data points — sorted back→front */
+        const pts = pointData.map(d => {
+            const rp = rotate(latLon3D(d.lat, d.lon, R), rotX, rotY);
+            const pp = project(rp, cx, cy, R);
+            return { ...d, pp };
+        }).filter(d => d.pp.visible).sort((a, b) => a.pp.z - b.pp.z);
+
+        pts.forEach(d => {
+            const { fill, glow } = normColor(d.norm);
+            const isH = d.label === hovered;
+            const baseR = 4 + d.norm * 7;
+            const r2 = isH ? baseR + 4 : baseR;
+            const { x, y } = d.pp;
+
+            if (isH) {
+                ctx.beginPath(); ctx.arc(x, y, r2 + 9, 0, Math.PI * 2);
+                ctx.strokeStyle = glow; ctx.lineWidth = 1; ctx.stroke();
+            }
+            ctx.beginPath(); ctx.arc(x, y, r2, 0, Math.PI * 2);
+            ctx.fillStyle = isH ? fill : fill + 'cc'; ctx.fill();
+
+            if (isH) {
+                const lw = 120, lh = 32;
+                const lx = x + 10 + lw > W ? x - lw - 10 : x + 10;
+                const ly = y - 16;
+                ctx.fillStyle = 'rgba(10,25,50,0.92)';
+                ctx.beginPath();
+                ctx.roundRect ? ctx.roundRect(lx, ly, lw, lh, 6) : ctx.rect(lx, ly, lw, lh);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(56,189,248,0.3)'; ctx.lineWidth = 0.5; ctx.stroke();
+                ctx.fillStyle = '#e2f7ff'; ctx.font = 'bold 11px JetBrains Mono, monospace';
+                ctx.textAlign = 'left';
+                ctx.fillText(d.label, lx + 8, ly + 13);
+                ctx.fillStyle = fill; ctx.font = '10px JetBrains Mono, monospace';
+                ctx.fillText('val: ' + (+d.value.toFixed(3)).toLocaleString(), lx + 8, ly + 26);
+            }
+        });
+
+        /* Highlight */
+        const shine = ctx.createRadialGradient(cx - R * 0.32, cy - R * 0.32, 0, cx, cy, R);
+        shine.addColorStop(0, 'rgba(255,255,255,0.07)');
+        shine.addColorStop(0.5, 'rgba(255,255,255,0)');
+        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+        ctx.fillStyle = shine; ctx.fill();
+
+        /* Border */
+        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(6,182,212,0.3)'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+    canvas.addEventListener('mousedown', e => { drag = true; auto = false; lastMX = e.offsetX; lastMY = e.offsetY; });
+    canvas.addEventListener('mousemove', e => {
+        if (drag) {
+            rotY += (e.offsetX - lastMX) * 0.008;
+            rotX += (e.offsetY - lastMY) * 0.008;
+            rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotX));
+            lastMX = e.offsetX; lastMY = e.offsetY;
+        } else {
+            const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.42;
+            hovered = null;
+            pointData.forEach(d => {
+                const rp = rotate(latLon3D(d.lat, d.lon, R), rotX, rotY);
+                const pp = project(rp, cx, cy, R);
+                if (!pp.visible) return;
+                const dist = Math.hypot(e.offsetX - pp.x, e.offsetY - pp.y);
+                if (dist < 14) hovered = d.label;
+            });
+            const hint = document.getElementById('globe-hint');
+            hint.textContent = hovered
+                ? `${hovered} · val: ${(pointData.find(d=>d.label===hovered)?.value||0).toFixed(2)}`
+                : '🖱️ Drag untuk putar · Hover titik untuk detail';
+        }
+    });
+    canvas.addEventListener('mouseup',    () => { drag = false; setTimeout(() => { auto = true; }, 2800); });
+    canvas.addEventListener('mouseleave', () => { drag = false; hovered = null; });
+
+    canvas.addEventListener('touchstart', e => { drag = true; auto = false; lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY; e.preventDefault(); }, { passive: false });
+    canvas.addEventListener('touchmove', e => {
+        if (!drag) return;
+        rotY += (e.touches[0].clientX - lastMX) * 0.008;
+        rotX += (e.touches[0].clientY - lastMY) * 0.008;
+        rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotX));
+        lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY;
+        e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchend', () => { drag = false; setTimeout(() => { auto = true; }, 2800); });
+
+    function loop() {
+        if (auto) rotY += 0.003;
+        draw();
+        requestAnimationFrame(loop);
+    }
+    loop();
+}
+
+/* ═══════════════════════════════════════════
+   LINE CHART (Chart.js-free, plain canvas)
+═══════════════════════════════════════════ */
+function drawLineCanvas(canvasId, labels, values, label, color) {
+    const c   = document.getElementById(canvasId);
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    const W   = c.offsetWidth || 260;
+    const H   = parseInt(c.getAttribute('height')) || 150;
+    c.width = W; c.height = H;
+    const pad = { l: 36, r: 12, t: 10, b: 22 };
+    const maxV = Math.max(...values, 1);
+    const minV = Math.min(...values, 0);
+    const range = maxV - minV || 1;
+
+    function px(i) { return pad.l + (i / (values.length - 1 || 1)) * (W - pad.l - pad.r); }
+    function py(v) { return pad.t + (1 - (v - minV) / range) * (H - pad.t - pad.b); }
+
+    ctx.strokeStyle = 'rgba(56,189,248,0.08)'; ctx.lineWidth = 0.5;
+    [0, 0.25, 0.5, 0.75, 1].forEach(f => {
+        const y = pad.t + (1 - f) * (H - pad.t - pad.b);
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+        const val = minV + f * range;
+        ctx.fillStyle = '#5ba8be'; ctx.font = '8px JetBrains Mono'; ctx.textAlign = 'right';
+        ctx.fillText(val.toFixed(val < 10 ? 1 : 0), pad.l - 3, y + 3);
+    });
+
+    const pts = values.map((v, i) => ({ x: px(i), y: py(v) }));
+    ctx.beginPath(); ctx.moveTo(pts[0].x, H - pad.b);
+    pts.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.lineTo(pts[pts.length - 1].x, H - pad.b); ctx.closePath();
+    ctx.fillStyle = color + '18'; ctx.fill();
+
+    ctx.beginPath(); pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.strokeStyle = color; ctx.lineWidth = 1.8; ctx.stroke();
+
+    // x-labels (every ~4)
+    ctx.fillStyle = '#5ba8be'; ctx.font = '8px JetBrains Mono'; ctx.textAlign = 'center';
+    const step = Math.max(1, Math.floor(labels.length / 6));
+    labels.forEach((l, i) => {
+        if (i % step === 0) ctx.fillText(String(l).substring(0, 8), px(i), H - pad.b + 13);
     });
 }
 
-// Generate insight cards dari data
-function buildInsights(ds, num, cat) {
-    const insightEl = document.getElementById('insight-bar');
-    if (!insightEl || !num.length || !cat.length) return;
+/* ═══════════════════════════════════════════
+   DONUT CHART
+═══════════════════════════════════════════ */
+function drawDonut(canvasId, legendId, data) {
+    const c = document.getElementById(canvasId);
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    const CX = 50, CY = 50, R = 40, RI = 24;
+    const total = data.reduce((s, d) => s + d.v, 0);
+    let a = -Math.PI / 2;
+    data.forEach((d, i) => {
+        const slice = (d.v / total) * Math.PI * 2;
+        ctx.beginPath(); ctx.moveTo(CX, CY);
+        ctx.arc(CX, CY, R, a, a + slice); ctx.closePath();
+        ctx.fillStyle = PAL[i % PAL.length]; ctx.fill();
+        a += slice;
+    });
+    ctx.beginPath(); ctx.arc(CX, CY, RI, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(10,30,60,0.92)'; ctx.fill();
 
-    // Insight 1: kolom numerik pertama — total & top entity
-    const col0 = num[0];
-    const t0 = topNAll(ds.records, cat[0], col0, 1);
-    const total0 = ds.records.reduce((s,r)=>s+(parseFloat(r[col0])||0),0);
-    const top0Label = t0.labels[0] || '-';
-    const top0Val = t0.values[0] || 0;
-
-    // Insight 2: kolom numerik ke-2 — rata-rata
-    const col1 = num[1] || num[0];
-    const vals1 = ds.records.map(r=>parseFloat(r[col1])||0).filter(v=>v>0);
-    const avg1 = vals1.length ? (vals1.reduce((a,b)=>a+b,0)/vals1.length) : 0;
-    const max1 = vals1.length ? Math.max(...vals1) : 0;
-
-    // Insight 3: total records & kolom count
-    const rowCount = ds.row_count || ds.records.length;
-    const colCount = ds.headers.length;
-    const numColCount = num.length;
-
-    insightEl.innerHTML = `
-        <div class="insight-card">
-            <div class="insight-icon">🏆</div>
-            <div>
-                <div class="insight-label">Top ${cat[0]}</div>
-                <div class="insight-value">${top0Label}</div>
-                <div class="insight-sub">${col0}: ${Number(top0Val.toFixed(4)).toLocaleString()} (highest)</div>
-            </div>
-        </div>
-        <div class="insight-card">
-            <div class="insight-icon">📈</div>
-            <div>
-                <div class="insight-label">Avg ${col1}</div>
-                <div class="insight-value">${avg1.toFixed(4)}</div>
-                <div class="insight-sub">Max: ${max1.toFixed(4)} across ${vals1.length} records</div>
-            </div>
-        </div>
-        <div class="insight-card">
-            <div class="insight-icon">🗂️</div>
-            <div>
-                <div class="insight-label">Dataset Shape</div>
-                <div class="insight-value">${Number(rowCount).toLocaleString()} rows</div>
-                <div class="insight-sub">${colCount} columns · ${numColCount} numeric · ${cat.length} categorical</div>
-            </div>
-        </div>
-    `;
+    const el = document.getElementById(legendId);
+    if (el) {
+        el.innerHTML = data.map((d, i) =>
+            `<div class="donut-row">
+                <div class="donut-dot" style="background:${PAL[i%PAL.length]};"></div>
+                <div class="donut-lbl">${d.label.substring(0,16)}</div>
+                <div class="donut-pct">${((d.v/total)*100).toFixed(1)}%</div>
+            </div>`
+        ).join('');
+    }
 }
 
+/* ═══════════════════════════════════════════
+   BAR ROWS
+═══════════════════════════════════════════ */
+function renderBars(containerId, labels, values, color) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const maxV = Math.max(...values, 1);
+    el.innerHTML = labels.map((l, i) =>
+        `<div class="bar-row">
+            <div class="bar-label">${l}</div>
+            <div class="bar-track">
+                <div class="bar-fill" style="width:${(values[i]/maxV*100).toFixed(1)}%;background:${color||PAL[i%PAL.length]};"></div>
+            </div>
+            <div class="bar-val">${(+values[i].toFixed(3)).toLocaleString()}</div>
+        </div>`
+    ).join('');
+}
+
+/* ═══════════════════════════════════════════
+   MAIN FETCH + RENDER
+═══════════════════════════════════════════ */
 async function buildDashboard() {
-    const res = await fetch('{{ route("dashboard.chart-data") }}');
-    const datasets = await res.json();
+    const res  = await fetch('{{ route("dashboard.chart-data") }}');
+    const data = await res.json();
 
     document.getElementById('loading-state').style.display = 'none';
 
-    if (!datasets.length) {
+    if (!data.length) {
         document.getElementById('empty-state').style.display = 'block';
         return;
     }
 
-    document.getElementById('dashboard-content').style.display = 'block';
-    destroyAll();
+    document.getElementById('dash-content').style.display = 'block';
+    document.getElementById('ticker-bar').style.display   = 'flex';
 
-    // Pills
-    document.getElementById('dataset-pills').innerHTML = datasets.map((ds,i) =>
-        `<span class="dataset-pill"><span class="dot" style="background:${PALETTE[i%PALETTE.length]}"></span>${ds.dataset_name}</span>`
-    ).join('');
-
-    // Ticker
-    const tickerContent = datasets.map(ds =>
-        `<span class="ticker-item">${ds.dataset_name} <span>▲ ${ds.row_count.toLocaleString()} rows</span></span>`
-    ).join('');
-    document.getElementById('ticker-items').innerHTML = tickerContent + tickerContent;
-    document.getElementById('ticker-bar').style.display = 'flex';
-
-    // Table
-    document.getElementById('datasets-table-body').innerHTML = datasets.map((ds,i) => `
-        <tr>
-            <td style="color:var(--text-muted);font-size:11px;">${i+1}</td>
-            <td style="font-family:'DM Sans';font-weight:500;color:var(--text-primary);">
-                <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${PALETTE[i%PALETTE.length]};margin-right:7px;"></span>${ds.dataset_name}
-            </td>
-            <td>${ds.file_name}</td>
-            <td>${ds.row_count.toLocaleString()}</td>
-            <td>${ds.col_count}</td>
-            <td>${ds.uploaded_at}</td>
-            <td><a href="/data-warehouse/public/datasets/${ds.dataset_id}" class="btn btn-secondary btn-sm">View</a></td>
-        </tr>
-    `).join('');
-
-    const row1 = document.getElementById('row1');
-    const row2 = document.getElementById('row2');
-    const row3 = document.getElementById('row3');
-    row1.innerHTML=''; row2.innerHTML=''; row3.innerHTML='';
-
-    const ds = datasets[0];
-    const color0 = PALETTE[0];
+    const ds = data[0];
     const { num, cat } = detectCols(ds.records, ds.headers);
-    if (!num.length || !cat.length) return;
 
-    // Insight cards
-    buildInsights(ds, num, cat);
+    /* Dataset pills */
+    document.getElementById('ds-pills').innerHTML = data.map((d, i) =>
+        `<div class="ds-pill"><span class="dot" style="background:${PAL[i%PAL.length]};"></span>${d.dataset_name}</div>`
+    ).join('');
 
-    // ROW 1: Main bar (wide) + doughnut
-    const t1 = topNAll(ds.records, cat[0], num[0], 12);
-    const tp1 = topNAll(ds.records, cat[0], num[0], 7);
-    row1.innerHTML += box(`c-main`, ds.dataset_name, `${num[0]} by ${cat[0]} — Top 12`, 'OVERVIEW', 220, ['bar','line','doughnut']);
-    row1.innerHTML += box(`c-pie`, `Distribution`, `${num[0]} top 7`, 'SHARE', 220, ['doughnut','pie','bar']);
-    setTimeout(() => {
-        storeAndMake(`c-main`, 'bar', t1.labels, t1.values, num[0], color0);
-        storeAndMake(`c-pie`, 'doughnut', tp1.labels, tp1.values, num[0], PALETTE[1]);
-    }, 50);
+    /* Ticker */
+    const tickHtml = data.map(d =>
+        `<span class="tick-item">${d.dataset_name} <span class="up">▲ ${d.row_count.toLocaleString()} rows</span></span>`
+    ).join('');
+    document.getElementById('ticker-items').innerHTML = tickHtml + tickHtml;
 
-    // ROW 2: 3 chart dari kolom numerik berbeda
-    // FIXED: pakai topNAll (tidak skip zero) dan tidak ada filter ketat
-    const row2Cols = num.slice(0, 3); // langsung ambil 3 pertama, apapun isinya
-    row2Cols.forEach((yCol, i) => {
-        const colors2 = [PALETTE[2], PALETTE[3], PALETTE[4]];
-        const types2 = [['line','bar','doughnut'], ['bar','line','pie'], ['line','bar','pie']];
-        const t = topNAll(ds.records, cat[0], yCol, 12);
-        row2.innerHTML += box(`c-r2-${i}`, ds.dataset_name, `${yCol} by ${cat[0]}`, yCol.substring(0,14).toUpperCase(), 180, types2[i]);
-        setTimeout(() => storeAndMake(`c-r2-${i}`, types2[i][0], t.labels, t.values, yCol, colors2[i], { fill: i===0 }), 120+i*40);
-    });
+    /* Table */
+    document.getElementById('ds-table').innerHTML = data.map((d, i) =>
+        `<tr>
+            <td style="color:var(--text-muted);">${i+1}</td>
+            <td style="font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--text-primary);">
+                <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${PAL[i%PAL.length]};margin-right:8px;"></span>${d.dataset_name}
+            </td>
+            <td>${d.file_name}</td>
+            <td>${d.row_count.toLocaleString()}</td>
+            <td>${d.col_count}</td>
+            <td>${d.uploaded_at}</td>
+            <td><a href="/datasets/${d.dataset_id}" class="btn btn-secondary btn-sm">Lihat</a></td>
+        </tr>`
+    ).join('');
 
-    // Fallback: kalau num < 3, isi sisa slot row2 dari kolom num berbeda dengan cat berbeda
-    if (row2Cols.length < 3 && cat.length > 1) {
-        for (let i = row2Cols.length; i < 3; i++) {
-            const yCol = num[i % num.length];
-            const xCol = cat[Math.min(i, cat.length-1)];
-            const colors2 = [PALETTE[2], PALETTE[3], PALETTE[4]];
-            const t = topNAll(ds.records, xCol, yCol, 12);
-            row2.innerHTML += box(`c-r2-fb-${i}`, ds.dataset_name, `${yCol} by ${xCol}`, yCol.substring(0,14).toUpperCase(), 180, ['bar','line','pie']);
-            setTimeout(() => storeAndMake(`c-r2-fb-${i}`, 'bar', t.labels, t.values, yCol, colors2[i%3]), 120+i*40);
-        }
-    }
+    if (!num.length || !cat.length) { initGlobe([]); return; }
 
-    // ROW 3: 3 chart kombinasi
-    const colors3 = [PALETTE[5], PALETTE[6], PALETTE[7]];
+    /* ── GLOBE data from CSV ── */
+    const globeRaw = topN(ds.records, cat[0], num[0], 40);
+    const globeData = globeRaw.labels.map((l, i) => ({ label: l, value: globeRaw.values[i] }));
+    initGlobe(globeData);
 
-    // Chart 3-1: Pie dari kategori ke-2 (atau ke-1)
-    const catCol2 = cat[1] || cat[0];
+    /* ── TOP 10 BARS ── */
+    const t10 = topN(ds.records, cat[0], num[0], 10);
+    document.getElementById('top10-title').textContent = `Top ${cat[0]}`;
+    document.getElementById('top10-sub').textContent   = `nilai ${num[0]}`;
+    renderBars('top10-bars', t10.labels, t10.values, null);
+
+    /* ── INSIGHT ROW ── */
+    const allVals0 = ds.records.map(r => parseFloat(r[num[0]]) || 0).filter(v => v > 0);
+    const total0   = allVals0.reduce((a, b) => a + b, 0);
+    const avg0     = allVals0.length ? (total0 / allVals0.length) : 0;
+    const max0     = Math.max(...allVals0, 0);
+    const topEntity = t10.labels[0] || '-';
+
     const numCol2 = num[1] || num[0];
-    const tp3 = topNAll(ds.records, catCol2, numCol2, 6);
-    row3.innerHTML += box(`c-r3-0`, ds.dataset_name, `${numCol2} by ${catCol2}`, 'PIE', 180, ['pie','doughnut','bar']);
-    setTimeout(() => storeAndMake(`c-r3-0`, 'pie', tp3.labels, tp3.values, numCol2, colors3[0]), 180);
+    const vals2   = ds.records.map(r => parseFloat(r[numCol2]) || 0).filter(v => v > 0);
+    const avg2    = vals2.length ? vals2.reduce((a, b) => a + b, 0) / vals2.length : 0;
 
-    // Chart 3-2: Bar dari num ke-3
-    const numCol3 = num[3] || num[2] || num[1] || num[0];
-    const tb3 = topNAll(ds.records, cat[0], numCol3, 10);
-    row3.innerHTML += box(`c-r3-1`, ds.dataset_name, `${numCol3} by ${cat[0]}`, 'BAR', 180, ['bar','line','doughnut']);
-    setTimeout(() => storeAndMake(`c-r3-1`, 'bar', tb3.labels, tb3.values, numCol3, colors3[1]), 210);
+    document.getElementById('insight-row').innerHTML = `
+        <div class="insight-card">
+            <div class="ins-icon">🏆</div>
+            <div>
+                <div class="ins-label">Top ${cat[0]}</div>
+                <div class="ins-val">${topEntity}</div>
+                <div class="ins-sub">${num[0]}: ${t10.values[0]?.toLocaleString() || '-'} (tertinggi)</div>
+            </div>
+        </div>
+        <div class="insight-card">
+            <div class="ins-icon">📈</div>
+            <div>
+                <div class="ins-label">Rata-rata ${num[0]}</div>
+                <div class="ins-val">${avg0.toFixed(3)}</div>
+                <div class="ins-sub">Max: ${max0.toFixed(3)} · ${allVals0.length} records</div>
+            </div>
+        </div>
+        <div class="insight-card">
+            <div class="ins-icon">🗂️</div>
+            <div>
+                <div class="ins-label">Dataset Shape</div>
+                <div class="ins-val">${ds.row_count.toLocaleString()} baris</div>
+                <div class="ins-sub">${ds.headers.length} kolom · ${num.length} numerik · ${cat.length} kategorik</div>
+            </div>
+        </div>`;
 
-    // Chart 3-3: Line trend dari num ke-4
-    const numCol4 = num[4] || num[2] || num[0];
-    const lineRecs = ds.records.slice(0, 20);
-    const ll = lineRecs.map(r=>String(r[cat[0]]??'').substring(0,15));
-    const lv = lineRecs.map(r=>parseFloat(r[numCol4])||0);
-    row3.innerHTML += box(`c-r3-2`, ds.dataset_name, `${numCol4} trend`, 'LINE', 180, ['line','bar','pie']);
-    setTimeout(() => storeAndMake(`c-r3-2`, 'line', ll, lv, numCol4, colors3[2], { fill:true }), 240);
+    /* ── CHART 2: Line ── */
+    const lineRecs = ds.records.slice(0, 24);
+    const lineX    = lineRecs.map(r => String(r[cat[0]] || '').substring(0, 10));
+    const lineY    = lineRecs.map(r => parseFloat(r[num[0]]) || 0);
+    document.getElementById('c2-title').textContent = `${num[0]} trend`;
+    document.getElementById('c2-sub').textContent   = `${ds.dataset_name}`;
+    setTimeout(() => drawLineCanvas('chart2', lineX, lineY, num[0], '#06b6d4'), 80);
 
-    // Animasi scroll
-    setTimeout(observeCharts, 300);
+    /* ── CHART 3: Donut ── */
+    const catCol2 = cat[1] || cat[0];
+    const d3 = topN(ds.records, catCol2, num[0], 5);
+    document.getElementById('c3-title').textContent = `Distribusi ${catCol2}`;
+    document.getElementById('c3-sub').textContent   = `${num[0]}`;
+    setTimeout(() => drawDonut('chart3', 'donut-legend',
+        d3.labels.map((l, i) => ({ label: l, v: d3.values[i] }))
+    ), 100);
+
+    /* ── CHART 4: Bar num[2] ── */
+    const numCol4 = num[2] || num[1] || num[0];
+    const t4 = topN(ds.records, cat[0], numCol4, 8);
+    document.getElementById('c4-title').textContent = `Top ${cat[0]}`;
+    document.getElementById('c4-sub').textContent   = `nilai ${numCol4}`;
+    setTimeout(() => renderBars('c4-bars', t4.labels, t4.values, '#10b981'), 60);
 }
 
 buildDashboard();

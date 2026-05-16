@@ -406,15 +406,12 @@
                 <span class="nav-ico">⬆️</span> Upload Dataset
             </a>
             <div class="nav-label">Visualisasi</div>
-            <div class="nav-item">
-                <span class="nav-ico">🌍</span> Globe Map
-            </div>
-            <div class="nav-item">
-                <span class="nav-ico">📊</span> Pollution Charts
-            </div>
-            <div class="nav-item">
-                <span class="nav-ico">⚠️</span> Risk Analysis (DSS)
-            </div>
+<a href="{{ route('ocean.mis') }}" class="nav-item {{ request()->routeIs('ocean.mis') ? 'active' : '' }}">
+    <span class="nav-ico">📊</span> MIS Dashboard
+</a>
+<a href="{{ route('ocean.dss') }}" class="nav-item {{ request()->routeIs('ocean.dss') ? 'active' : '' }}">
+    <span class="nav-ico">⚠️</span> DSS Risk Analysis
+</a>
             <div class="nav-label">Info</div>
             <div class="nav-item">
                 <span class="nav-ico">ℹ️</span> About Project

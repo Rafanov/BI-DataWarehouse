@@ -72,29 +72,29 @@
     }
     .cbox-body { padding:16px; }
 
-    /* ── GLOBE ── */
+    /* ── GLOBE (Three.js) ── */
     .globe-container {
-        position:relative; background:rgba(2,10,20,0.5);
+        position:relative; background:#000814;
         border-radius:0 0 14px 14px; overflow:hidden;
     }
-    canvas#globe3d { display:block; width:100%; cursor:grab; }
-    canvas#globe3d:active { cursor:grabbing; }
+    #dash-globe-canvas { display:block; width:100%!important; height:100%!important; cursor:grab; }
+    #dash-globe-canvas:active { cursor:grabbing; }
     .globe-hint {
-        position:absolute; top:10px; left:50%; transform:translateX(-50%);
-        background:rgba(10,30,60,0.82); border:1px solid rgba(56,189,248,0.15);
+        position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+        background:rgba(10,30,60,0.85); border:1px solid rgba(56,189,248,0.15);
         border-radius:6px; padding:4px 12px;
         font-size:11px; color:var(--text-muted);
-        backdrop-filter:blur(10px); white-space:nowrap; z-index:5;
-        transition:opacity 0.3s;
+        backdrop-filter:blur(10px); white-space:nowrap; z-index:10;
+        pointer-events:none;
     }
     .globe-overlay {
         position:absolute; bottom:10px; left:10px; right:10px;
         display:flex; justify-content:space-between; align-items:flex-end;
-        pointer-events:none; z-index:5;
+        pointer-events:none; z-index:10;
     }
     .globe-legend {
-        background:rgba(10,30,60,0.82); border:1px solid rgba(56,189,248,0.15);
-        border-radius:9px; padding:9px 11px; backdrop-filter:blur(10px);
+        background:rgba(10,30,60,0.85); border:1px solid rgba(56,189,248,0.15);
+        border-radius:9px; padding:9px 11px;
     }
     .g-legend-title { font-size:9px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
     .g-legend-row   { display:flex; align-items:center; gap:6px; margin-bottom:3px; }
@@ -266,15 +266,15 @@
                 </div>
                 <div class="cbox-tag">3D INTERACTIVE</div>
             </div>
-            <div class="globe-container">
-                <canvas id="globe3d" style="height:300px;"></canvas>
-                <div class="globe-hint" id="globe-hint">🖱️ Drag untuk memutar globe</div>
+            <div class="globe-container" id="dash-globe-mount" style="height:300px;">
+                <canvas id="dash-globe-canvas"></canvas>
+                <div class="globe-hint" id="globe-hint">🖱 Drag putar · Scroll zoom · Hover negara</div>
                 <div class="globe-overlay">
                     <div class="globe-legend">
                         <div class="g-legend-title">Nilai Data</div>
-                        <div class="g-legend-row"><div class="g-legend-dot" style="background:#ef4444;"></div><div class="g-legend-lbl">Tinggi</div></div>
-                        <div class="g-legend-row"><div class="g-legend-dot" style="background:#f59e0b;"></div><div class="g-legend-lbl">Sedang</div></div>
-                        <div class="g-legend-row"><div class="g-legend-dot" style="background:#10b981;"></div><div class="g-legend-lbl">Rendah</div></div>
+                        <div class="g-legend-row"><div class="g-legend-dot" style="background:#DC2626;"></div><div class="g-legend-lbl">Tinggi</div></div>
+                        <div class="g-legend-row"><div class="g-legend-dot" style="background:#D97706;"></div><div class="g-legend-lbl">Sedang</div></div>
+                        <div class="g-legend-row"><div class="g-legend-dot" style="background:#16A34A;"></div><div class="g-legend-lbl">Rendah</div></div>
                     </div>
                 </div>
             </div>
@@ -357,6 +357,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════
    PALETTE & HELPERS
@@ -388,28 +389,78 @@ function detectCols(records, headers) {
    GLOBE 3D
 ═══════════════════════════════════════════ */
 function initGlobe(globeData) {
-    const canvas = document.getElementById('globe3d');
-    const ctx    = canvas.getContext('2d');
-    const DPR    = Math.min(devicePixelRatio, 2);
-    let W, H;
-
-    function resize() {
-        W = canvas.offsetWidth;
-        H = canvas.offsetHeight;
-        canvas.width  = W * DPR;
-        canvas.height = H * DPR;
-        ctx.scale(DPR, DPR);
+    // ── Three.js Globe (sama seperti MIS page) ──
+    if (typeof THREE === 'undefined') {
+        console.warn('Three.js belum loaded');
+        return;
     }
-    resize();
-    new ResizeObserver(resize).observe(canvas);
 
-    let rotX = 0.25, rotY = 0.3;
-    let drag = false, lastMX = 0, lastMY = 0;
-    let auto = true;
-    let hovered = null;
+    const mount  = document.getElementById('dash-globe-mount');
+    const canvas = document.getElementById('dash-globe-canvas');
+    if (!mount || !canvas) return;
 
-    /* Country lat/lon database */
-    const COORDS = {
+    const W = mount.clientWidth, H = mount.clientHeight || 300;
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, W/H, 0.1, 100);
+    camera.position.z = 2.4;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+    renderer.setSize(W, H);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setClearColor(0x000814, 1);
+
+    // Stars
+    const starPos = [];
+    for (let i=0; i<5000; i++) starPos.push((Math.random()-.5)*80,(Math.random()-.5)*80,(Math.random()-.5)*80);
+    const starGeo = new THREE.BufferGeometry();
+    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+    scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xffffff,size:0.05,sizeAttenuation:true})));
+
+    // Earth procedural texture
+    const tc = document.createElement('canvas');
+    tc.width=1024; tc.height=512;
+    const tx = tc.getContext('2d');
+    const og = tx.createLinearGradient(0,0,0,512);
+    og.addColorStop(0,'#0a2a5e'); og.addColorStop(.5,'#0c3d7a'); og.addColorStop(1,'#071e45');
+    tx.fillStyle=og; tx.fillRect(0,0,1024,512);
+    tx.fillStyle='#2d5a1b';
+    [[190,165,80,90],[240,320,55,95],[490,145,60,60],[500,285,70,110],[680,165,165,90],[775,340,75,55]]
+        .forEach(([cx,cy,rx,ry])=>{ tx.beginPath(); tx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2); tx.fill(); });
+    tx.fillStyle='#d4e8f0'; tx.beginPath(); tx.ellipse(512,480,320,40,0,0,Math.PI*2); tx.fill();
+    tx.fillStyle='#b8d4e8'; tx.beginPath(); tx.ellipse(280,100,40,55,0,0,Math.PI*2); tx.fill();
+
+    const earthMat = new THREE.MeshPhongMaterial({
+        map: new THREE.CanvasTexture(tc),
+        specular: new THREE.Color(0x1a3a6e), shininess:18,
+        emissive: new THREE.Color(0x061428), emissiveIntensity:0.15,
+    });
+
+    // Try NASA texture
+    new THREE.TextureLoader().load(
+        'https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/textures/planets/earth_atmos_2048.jpg',
+        tex => { earthMat.map = tex; earthMat.needsUpdate = true; },
+        undefined, ()=>{}
+    );
+
+    const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(1,64,64), earthMat);
+    scene.add(earthMesh);
+
+    // Atmosphere
+    scene.add(new THREE.Mesh(
+        new THREE.SphereGeometry(1.02,32,32),
+        new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.06,side:THREE.FrontSide})
+    ));
+
+    // Lighting
+    scene.add(new THREE.AmbientLight(0x334466, 0.8));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+    sun.position.set(5,3,5); scene.add(sun);
+    const rim = new THREE.DirectionalLight(0x4488cc, 0.4);
+    rim.position.set(-5,-2,-3); scene.add(rim);
+
+    // Markers
+    const COORDS_3D = {
         'China':[35,105],'Indonesia':[-5,120],'Philippines':[12,122],'Vietnam':[16,108],
         'Sri Lanka':[7,81],'Thailand':[15,101],'Egypt':[27,30],'Malaysia':[4,108],
         'Nigeria':[9,8],'Bangladesh':[24,90],'USA':[38,-97],'Brazil':[-15,-47],
@@ -427,188 +478,71 @@ function initGlobe(globeData) {
         'Czech Republic':[50,15],'Hungary':[47,19],'Austria':[47,14],'Switzerland':[47,8],
     };
 
-    /* Map first categorical column values to coords */
-    let pointData = [];
+    function latLonVec3(lat,lon,r) {
+        const phi=(90-lat)*Math.PI/180, theta=(lon+180)*Math.PI/180;
+        return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+    }
+
+    const markerGroup = new THREE.Group();
+    scene.add(markerGroup);
+
     if (globeData && globeData.length) {
-        const maxV = Math.max(...globeData.map(d => d.value));
-        globeData.forEach(d => {
-            const coords = COORDS[d.label];
-            if (coords) {
-                pointData.push({
-                    label: d.label,
-                    value: d.value,
-                    lat: coords[0],
-                    lon: coords[1],
-                    norm: maxV > 0 ? d.value / maxV : 0
-                });
+        const mx = Math.max(...globeData.map(d=>d.value), 1);
+        globeData.forEach(d=>{
+            const coord = COORDS_3D[d.label]; if (!coord) return;
+            const norm = d.value / mx;
+            const size = 0.012 + norm*0.032;
+            const r = norm > 0.7 ? 0.863 : norm > 0.4 ? 0.851 : 0.086;
+            const g = norm > 0.7 ? 0.165 : norm > 0.4 ? 0.467 : 0.639;
+            const b = norm > 0.7 ? 0.165 : norm > 0.4 ? 0.071 : 0.290;
+            const col = new THREE.Color(r, g, b);
+            const mat = new THREE.MeshPhongMaterial({color:col,emissive:col,emissiveIntensity:0.5,transparent:true,opacity:0.85});
+            const mesh = new THREE.Mesh(new THREE.SphereGeometry(size,8,8), mat);
+            mesh.position.copy(latLonVec3(coord[0], coord[1], 1.01));
+            markerGroup.add(mesh);
+            if (norm > 0.5) {
+                const rm = new THREE.Mesh(new THREE.SphereGeometry(size*1.8,8,8),
+                    new THREE.MeshPhongMaterial({color:col,transparent:true,opacity:0.2}));
+                rm.position.copy(latLonVec3(coord[0],coord[1],1.01));
+                markerGroup.add(rm);
             }
         });
     }
-    /* fallback: use some sample world points */
-    if (pointData.length === 0) {
-        Object.entries(COORDS).slice(0, 20).forEach(([label, [lat, lon]], i) => {
-            pointData.push({ label, value: Math.random() * 100, lat, lon, norm: Math.random() });
-        });
-    }
 
-    function latLon3D(lat, lon, r) {
-        const phi   = (90 - lat)  * Math.PI / 180;
-        const theta = (lon + 180) * Math.PI / 180;
-        return {
-            x: -r * Math.sin(phi) * Math.cos(theta),
-            y:  r * Math.cos(phi),
-            z:  r * Math.sin(phi) * Math.sin(theta)
-        };
-    }
-    function rotate(p, rx, ry) {
-        let { x, y, z } = p;
-        // Y-axis
-        let x1 = x * Math.cos(ry) + z * Math.sin(ry);
-        let z1 = -x * Math.sin(ry) + z * Math.cos(ry);
-        // X-axis
-        let y2 = y * Math.cos(rx) - z1 * Math.sin(rx);
-        let z2 = y * Math.sin(rx) + z1 * Math.cos(rx);
-        return { x: x1, y: y2, z: z2 };
-    }
-    function project(p, cx, cy, R) {
-        const sc = (R * 1.6) / (R * 1.6 + p.z * 0.25);
-        return { x: cx + p.x * sc, y: cy - p.y * sc, visible: p.z > -R * 0.08, z: p.z };
-    }
-    function normColor(n) {
-        if (n > 0.7) return { fill: '#ef4444', glow: 'rgba(239,68,68,0.4)' };
-        if (n > 0.4) return { fill: '#f59e0b', glow: 'rgba(245,158,11,0.3)' };
-        return { fill: '#10b981', glow: 'rgba(16,185,129,0.3)' };
-    }
+    // Mouse/touch controls
+    let isDrag=false, autoRot=true, prevM={x:0,y:0};
+    const onDown = e=>{ isDrag=true; autoRot=false; const c=e.touches?e.touches[0]:e; prevM={x:c.clientX,y:c.clientY}; };
+    const onUp   = ()=>{ isDrag=false; setTimeout(()=>autoRot=true,2500); };
+    const onMove = e=>{ if(!isDrag) return; const c=e.touches?e.touches[0]:e;
+        const dx=c.clientX-prevM.x, dy=c.clientY-prevM.y;
+        earthMesh.rotation.y+=dx*0.005; markerGroup.rotation.y+=dx*0.005;
+        earthMesh.rotation.x+=dy*0.003; markerGroup.rotation.x+=dy*0.003;
+        earthMesh.rotation.x=Math.max(-Math.PI/2.5,Math.min(Math.PI/2.5,earthMesh.rotation.x));
+        markerGroup.rotation.x=earthMesh.rotation.x;
+        prevM={x:c.clientX,y:c.clientY};
+    };
+    const onWheel=e=>{ camera.position.z=Math.max(1.5,Math.min(4.5,camera.position.z+e.deltaY*0.002)); };
+    mount.addEventListener('mousedown',onDown);
+    mount.addEventListener('touchstart',onDown,{passive:true});
+    window.addEventListener('mouseup',onUp);
+    window.addEventListener('touchend',onUp);
+    window.addEventListener('mousemove',onMove);
+    window.addEventListener('touchmove',onMove,{passive:true});
+    mount.addEventListener('wheel',onWheel,{passive:true});
 
-    function draw() {
-        ctx.clearRect(0, 0, W, H);
-        const cx = W / 2, cy = H / 2;
-        const R  = Math.min(W, H) * 0.42;
+    // Resize
+    new ResizeObserver(()=>{
+        const W2=mount.clientWidth, H2=mount.clientHeight||300;
+        camera.aspect=W2/H2; camera.updateProjectionMatrix();
+        renderer.setSize(W2,H2);
+    }).observe(mount);
 
-        /* Ocean gradient */
-        const g = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.3, 0, cx, cy, R);
-        g.addColorStop(0, '#0c4a6e');
-        g.addColorStop(0.55, '#064e6e');
-        g.addColorStop(1, '#021c2e');
-        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
-        ctx.fillStyle = g; ctx.fill();
-
-        /* Grid */
-        ctx.strokeStyle = 'rgba(56,189,248,0.09)'; ctx.lineWidth = 0.5;
-        for (let lat = -75; lat <= 75; lat += 15) {
-            ctx.beginPath(); let first = true;
-            for (let lon = -180; lon <= 180; lon += 4) {
-                const rp = rotate(latLon3D(lat, lon, R), rotX, rotY);
-                const pp = project(rp, cx, cy, R);
-                if (pp.visible) { first ? ctx.moveTo(pp.x, pp.y) : ctx.lineTo(pp.x, pp.y); first = false; }
-                else first = true;
-            }
-            ctx.stroke();
-        }
-        for (let lon = -180; lon <= 180; lon += 30) {
-            ctx.beginPath(); let first = true;
-            for (let lat = -90; lat <= 90; lat += 4) {
-                const rp = rotate(latLon3D(lat, lon, R), rotX, rotY);
-                const pp = project(rp, cx, cy, R);
-                if (pp.visible) { first ? ctx.moveTo(pp.x, pp.y) : ctx.lineTo(pp.x, pp.y); first = false; }
-                else first = true;
-            }
-            ctx.stroke();
-        }
-
-        /* Data points — sorted back→front */
-        const pts = pointData.map(d => {
-            const rp = rotate(latLon3D(d.lat, d.lon, R), rotX, rotY);
-            const pp = project(rp, cx, cy, R);
-            return { ...d, pp };
-        }).filter(d => d.pp.visible).sort((a, b) => a.pp.z - b.pp.z);
-
-        pts.forEach(d => {
-            const { fill, glow } = normColor(d.norm);
-            const isH = d.label === hovered;
-            const baseR = 4 + d.norm * 7;
-            const r2 = isH ? baseR + 4 : baseR;
-            const { x, y } = d.pp;
-
-            if (isH) {
-                ctx.beginPath(); ctx.arc(x, y, r2 + 9, 0, Math.PI * 2);
-                ctx.strokeStyle = glow; ctx.lineWidth = 1; ctx.stroke();
-            }
-            ctx.beginPath(); ctx.arc(x, y, r2, 0, Math.PI * 2);
-            ctx.fillStyle = isH ? fill : fill + 'cc'; ctx.fill();
-
-            if (isH) {
-                const lw = 120, lh = 32;
-                const lx = x + 10 + lw > W ? x - lw - 10 : x + 10;
-                const ly = y - 16;
-                ctx.fillStyle = 'rgba(10,25,50,0.92)';
-                ctx.beginPath();
-                ctx.roundRect ? ctx.roundRect(lx, ly, lw, lh, 6) : ctx.rect(lx, ly, lw, lh);
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(56,189,248,0.3)'; ctx.lineWidth = 0.5; ctx.stroke();
-                ctx.fillStyle = '#e2f7ff'; ctx.font = 'bold 11px JetBrains Mono, monospace';
-                ctx.textAlign = 'left';
-                ctx.fillText(d.label, lx + 8, ly + 13);
-                ctx.fillStyle = fill; ctx.font = '10px JetBrains Mono, monospace';
-                ctx.fillText('val: ' + (+d.value.toFixed(3)).toLocaleString(), lx + 8, ly + 26);
-            }
-        });
-
-        /* Highlight */
-        const shine = ctx.createRadialGradient(cx - R * 0.32, cy - R * 0.32, 0, cx, cy, R);
-        shine.addColorStop(0, 'rgba(255,255,255,0.07)');
-        shine.addColorStop(0.5, 'rgba(255,255,255,0)');
-        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
-        ctx.fillStyle = shine; ctx.fill();
-
-        /* Border */
-        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(6,182,212,0.3)'; ctx.lineWidth = 1.5; ctx.stroke();
-    }
-
-    canvas.addEventListener('mousedown', e => { drag = true; auto = false; lastMX = e.offsetX; lastMY = e.offsetY; });
-    canvas.addEventListener('mousemove', e => {
-        if (drag) {
-            rotY += (e.offsetX - lastMX) * 0.008;
-            rotX += (e.offsetY - lastMY) * 0.008;
-            rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotX));
-            lastMX = e.offsetX; lastMY = e.offsetY;
-        } else {
-            const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.42;
-            hovered = null;
-            pointData.forEach(d => {
-                const rp = rotate(latLon3D(d.lat, d.lon, R), rotX, rotY);
-                const pp = project(rp, cx, cy, R);
-                if (!pp.visible) return;
-                const dist = Math.hypot(e.offsetX - pp.x, e.offsetY - pp.y);
-                if (dist < 14) hovered = d.label;
-            });
-            const hint = document.getElementById('globe-hint');
-            hint.textContent = hovered
-                ? `${hovered} · val: ${(pointData.find(d=>d.label===hovered)?.value||0).toFixed(2)}`
-                : '🖱️ Drag untuk putar · Hover titik untuk detail';
-        }
-    });
-    canvas.addEventListener('mouseup',    () => { drag = false; setTimeout(() => { auto = true; }, 2800); });
-    canvas.addEventListener('mouseleave', () => { drag = false; hovered = null; });
-
-    canvas.addEventListener('touchstart', e => { drag = true; auto = false; lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY; e.preventDefault(); }, { passive: false });
-    canvas.addEventListener('touchmove', e => {
-        if (!drag) return;
-        rotY += (e.touches[0].clientX - lastMX) * 0.008;
-        rotX += (e.touches[0].clientY - lastMY) * 0.008;
-        rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotX));
-        lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY;
-        e.preventDefault();
-    }, { passive: false });
-    canvas.addEventListener('touchend', () => { drag = false; setTimeout(() => { auto = true; }, 2800); });
-
-    function loop() {
-        if (auto) rotY += 0.003;
-        draw();
+    // Animate
+    (function loop(){
         requestAnimationFrame(loop);
-    }
-    loop();
+        if(autoRot){ earthMesh.rotation.y+=0.002; markerGroup.rotation.y+=0.002; }
+        renderer.render(scene,camera);
+    })();
 }
 
 /* ═══════════════════════════════════════════

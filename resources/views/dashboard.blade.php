@@ -29,7 +29,7 @@
     .kpi-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; color:var(--text-muted); margin-bottom:7px; }
     .kpi-value { font-size:26px; font-weight:700; font-family:'JetBrains Mono',monospace; letter-spacing:-1px; color:var(--text-primary); line-height:1; }
     .kpi-sub   { font-size:11px; color:var(--text-muted); margin-top:5px; }
-    .kpi-icon  { position:absolute; top:14px; right:14px; font-size:20px; opacity:0.22; }
+    .kpi-icon  { position:absolute; top:14px; right:14px; width:22px; height:22px; opacity:0.22; }
 
     /* ── TICKER ── */
     .ticker {
@@ -125,7 +125,7 @@
         display:flex; align-items:flex-start; gap:12px;
         backdrop-filter: blur(16px);
     }
-    .ins-icon { font-size:20px; flex-shrink:0; margin-top:2px; }
+    .ins-icon { width:22px; height:22px; flex-shrink:0; margin-top:2px; }
     .ins-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:3px; }
     .ins-val   { font-size:14px; font-weight:600; color:var(--text-primary); line-height:1.3; }
     .ins-sub   { font-size:10px; color:var(--text-muted); margin-top:2px; }
@@ -162,7 +162,7 @@
 
     /* ── EMPTY STATE ── */
     .empty-state { text-align:center; padding:70px 20px; }
-    .empty-icon  { font-size:48px; margin-bottom:14px; }
+    .empty-icon  { width:52px; height:52px; margin:0 auto 14px; opacity:0.4; }
     .empty-title { font-size:18px; font-weight:600; color:var(--text-primary); margin-bottom:8px; }
     .empty-sub   { font-size:14px; color:var(--text-muted); }
 
@@ -190,31 +190,31 @@
 {{-- KPI CARDS --}}
 <div class="kpi-grid">
     <div class="kpi-card b">
-        <div class="kpi-icon">🗄️</div>
+        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
         <div class="kpi-label">Total Datasets</div>
         <div class="kpi-value">{{ $totalDatasets }}</div>
         <div class="kpi-sub">Semua upload</div>
     </div>
     <div class="kpi-card g">
-        <div class="kpi-icon">📋</div>
+        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div>
         <div class="kpi-label">Total Rows</div>
         <div class="kpi-value">{{ number_format($totalRows) }}</div>
         <div class="kpi-sub">Records indexed</div>
     </div>
     <div class="kpi-card o">
-        <div class="kpi-icon">📐</div>
+        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
         <div class="kpi-label">Total Columns</div>
         <div class="kpi-value">{{ number_format($totalCols) }}</div>
         <div class="kpi-sub">Fields tracked</div>
     </div>
     <div class="kpi-card r">
-        <div class="kpi-icon">📂</div>
+        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
         <div class="kpi-label">Recent Datasets</div>
         <div class="kpi-value">{{ $recentDatasets->count() }}</div>
         <div class="kpi-sub">Dalam 5 upload terakhir</div>
     </div>
     <div class="kpi-card p">
-        <div class="kpi-icon">👤</div>
+        <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
         <div class="kpi-label">Active User</div>
         <div class="kpi-value" style="font-size:18px;letter-spacing:0;">{{ Str::words(auth()->user()->name, 1, '') }}</div>
         <div class="kpi-sub">{{ auth()->user()->email }}</div>
@@ -238,10 +238,10 @@
 <div id="empty-state" style="display:none;">
     <div class="cbox">
         <div class="empty-state">
-            <div class="empty-icon">🌊</div>
+            <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.5"><path d="M2 12c1.5-3 3.5-4 6-4s4 2 6.5 2 4-1.5 7.5-1.5"/><path d="M2 17c1.5-3 3.5-4 6-4s4 2 6.5 2 4-1.5 7.5-1.5"/><path d="M2 7c1.5-3 3.5-4 6-4s4 2 6.5 2 4-1.5 7.5-1.5"/></svg></div>
             <div class="empty-title">Laut Data Masih Kosong</div>
             <div class="empty-sub">Upload dataset CSV pertama kamu untuk melihat dashboard.</div>
-            <a href="{{ route('datasets.create') }}" class="btn btn-primary" style="margin-top:20px;">⬆ Upload Dataset</a>
+            <a href="{{ route('datasets.create') }}" class="btn btn-primary" style="margin-top:20px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>Upload Dataset</a>
         </div>
     </div>
 </div>
@@ -261,14 +261,14 @@
         <div class="cbox">
             <div class="cbox-head">
                 <div>
-                    <div class="cbox-title">🌍 Globe 3D — Data dari Dataset CSV</div>
+                    <div class="cbox-title" style="display:flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Globe 3D — Data dari Dataset CSV</div>
                     <div class="cbox-sub">Titik = nilai kolom numerik · Drag untuk putar · Hover untuk detail</div>
                 </div>
                 <div class="cbox-tag">3D INTERACTIVE</div>
             </div>
             <div class="globe-container" id="dash-globe-mount" style="height:300px;">
                 <canvas id="dash-globe-canvas"></canvas>
-                <div class="globe-hint" id="globe-hint">🖱 Drag putar · Scroll zoom · Hover negara</div>
+                <div class="globe-hint" id="globe-hint"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>Drag putar · Scroll zoom · Hover negara</div>
                 <div class="globe-overlay">
                     <div class="globe-legend">
                         <div class="g-legend-title">Nilai Data</div>
@@ -341,7 +341,7 @@
                 <div class="cbox-title">Dataset Registry</div>
                 <div class="cbox-sub">Semua dataset yang diupload</div>
             </div>
-            <a href="{{ route('datasets.create') }}" class="btn btn-primary btn-sm">⬆ Upload</a>
+            <a href="{{ route('datasets.create') }}" class="btn btn-primary btn-sm"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>Upload</a>
         </div>
         <div class="tbl-scroll">
             <table>
@@ -711,7 +711,7 @@ async function buildDashboard() {
 
     document.getElementById('insight-row').innerHTML = `
         <div class="insight-card">
-            <div class="ins-icon">🏆</div>
+            <div class="ins-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="1.5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
             <div>
                 <div class="ins-label">Top ${cat[0]}</div>
                 <div class="ins-val">${topEntity}</div>
@@ -719,7 +719,7 @@ async function buildDashboard() {
             </div>
         </div>
         <div class="insight-card">
-            <div class="ins-icon">📈</div>
+            <div class="ins-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="1.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
             <div>
                 <div class="ins-label">Rata-rata ${num[0]}</div>
                 <div class="ins-val">${avg0.toFixed(3)}</div>
@@ -727,7 +727,7 @@ async function buildDashboard() {
             </div>
         </div>
         <div class="insight-card">
-            <div class="ins-icon">🗂️</div>
+            <div class="ins-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div>
             <div>
                 <div class="ins-label">Dataset Shape</div>
                 <div class="ins-val">${ds.row_count.toLocaleString()} baris</div>

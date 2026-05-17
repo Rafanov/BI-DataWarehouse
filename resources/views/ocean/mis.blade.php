@@ -28,7 +28,7 @@
 .kpi-card.kc-g::before { background:linear-gradient(90deg,#10b981,#34d399); }
 .kpi-card.kc-o::before { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
 .kpi-card.kc-r::before { background:linear-gradient(90deg,#ef4444,#f87171); }
-.kpi-icon { position:absolute; top:14px; right:14px; font-size:20px; opacity:0.2; }
+.kpi-icon { position:absolute; top:14px; right:14px; width:22px; height:22px; opacity:0.22; }
 .kpi-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; color:var(--text-muted); margin-bottom:6px; }
 .kpi-val   { font-size:26px; font-weight:700; font-family:'JetBrains Mono',monospace; letter-spacing:-1px; color:var(--text-primary); line-height:1; }
 .kpi-sub   { font-size:11px; color:var(--text-muted); margin-top:4px; }
@@ -94,7 +94,7 @@ canvas.cc  { display:block; width:100%; }
     <div class="cc">
         <div class="cc-head">
             <div>
-                <div class="cc-title">🌍 Peta Polusi Plastik Global</div>
+                <div class="cc-title" style="display:flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Peta Polusi Plastik Global</div>
                 <div class="cc-sub" id="geo-sub">Ocean Pollution Share per negara (2019)</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -104,8 +104,8 @@ canvas.cc  { display:block; width:100%; }
                     <button class="ind-tab" data-ind="recycled_share">Recycling</button>
                 </div>
                 <div class="toggle-row">
-                    <button class="tog active" id="btn-globe">🌍 Globe</button>
-                    <button class="tog" id="btn-atlas">🗺 Atlas</button>
+                    <button class="tog active" id="btn-globe"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:3px"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Globe</button>
+                    <button class="tog" id="btn-atlas"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:3px"><path d="M3 7l6-4 6 4 6-4v14l-6 4-6-4-6 4V7z"/><line x1="9" y1="3" x2="9" y2="17"/><line x1="15" y1="7" x2="15" y2="21"/></svg>Atlas</button>
                 </div>
             </div>
         </div>
@@ -113,7 +113,7 @@ canvas.cc  { display:block; width:100%; }
         {{-- Globe (Three.js) --}}
         <div id="globe-mount">
             <canvas id="globe-canvas-3d"></canvas>
-            <div class="globe-hint-bar" id="globe-hint">🖱 Drag putar · Scroll zoom · Hover negara</div>
+            <div class="globe-hint-bar" id="globe-hint"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>Drag putar · Scroll zoom · Hover negara</div>
             <div class="globe-legend-box">
                 <div class="gle-title" id="gle-title">Ocean Pollution Share</div>
                 <div class="gle-row"><div class="gle-dot" style="background:#DC2626;"></div><div class="gle-lbl">Tinggi</div></div>
@@ -150,7 +150,7 @@ canvas.cc  { display:block; width:100%; }
     <div class="cc">
         <div class="cc-head">
             <div>
-                <div class="cc-title">📈 Tren Produksi Plastik (1950–2019)</div>
+                <div class="cc-title" style="display:flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.8"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg> Tren Produksi Plastik (1950–2019)</div>
                 <div class="cc-sub">Annual plastic production (ton)</div>
             </div>
             <div class="toggle-row" id="mis01-toggle">
@@ -166,7 +166,7 @@ canvas.cc  { display:block; width:100%; }
     <div class="cc">
         <div class="cc-head">
             <div>
-                <div class="cc-title">♻️ Komposisi Pengelolaan Sampah</div>
+                <div class="cc-title" style="display:flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.8"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg> Komposisi Pengelolaan Sampah</div>
                 <div class="cc-sub">Share per metode · regional data</div>
             </div>
             <div class="toggle-row" id="mis02-toggle">
@@ -235,25 +235,25 @@ async function loadKpi() {
         const prod = (d.total_production_2019 / 1e6).toFixed(0);
         document.getElementById('kpi-grid').innerHTML = `
         <div class="kpi-card kc-b">
-            <div class="kpi-icon">🏭</div>
+            <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
             <div class="kpi-label">Produksi Plastik 2019</div>
             <div class="kpi-val">${Number(prod).toLocaleString()}</div>
             <div class="kpi-sub">Juta ton · produksi global</div>
         </div>
         <div class="kpi-card kc-g">
-            <div class="kpi-icon">♻️</div>
+            <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="1.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg></div>
             <div class="kpi-label">Recycling Rate Global</div>
             <div class="kpi-val">${d.avg_recycled ?? '—'}%</div>
             <div class="kpi-sub">World average (2019)</div>
         </div>
         <div class="kpi-card kc-o">
-            <div class="kpi-icon">⚠️</div>
+            <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
             <div class="kpi-label">Mismanaged Global</div>
             <div class="kpi-val">${d.world_mismanaged ?? '—'}%</div>
             <div class="kpi-sub">Share sampah tak terkelola</div>
         </div>
         <div class="kpi-card kc-r">
-            <div class="kpi-icon">🐠</div>
+            <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
             <div class="kpi-label">Top Poluter Laut</div>
             <div class="kpi-val" style="font-size:18px;letter-spacing:0;">${d.top_polluter?.entity ?? '—'}</div>
             <div class="kpi-sub">${d.top_polluter ? d.top_polluter.ocean_pollution_share.toFixed(2)+'% kontribusi' : ''}</div>

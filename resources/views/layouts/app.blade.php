@@ -172,7 +172,7 @@
         }
         .nav-item:hover { background: var(--accent-dim); color: var(--accent); }
         .nav-item.active { background: rgba(56,189,248,0.16); color: var(--accent); }
-        .nav-item .nav-ico { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+        .nav-item .nav-ico { width: 18px; height: 18px; display:inline-flex; align-items:center; justify-content:center; flex-shrink: 0; }
         .nav-item .nav-badge {
             margin-left: auto; font-size: 9px; font-weight: 700;
             padding: 1px 6px; border-radius: 10px;
@@ -382,7 +382,7 @@
     <aside class="sidebar">
         <div class="sidebar-logo">
             <div class="logo-row">
-                <div class="logo-icon">🌊</div>
+                <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#ffffff" stroke-width="2"><path d="M2 12c1.5-3 3.5-4 6-4s4 2 6.5 2 4-1.5 7.5-1.5"/><path d="M2 17c1.5-3 3.5-4 6-4s4 2 6.5 2 4-1.5 7.5-1.5"/><path d="M2 7c1.5-3 3.5-4 6-4s4 2 6.5 2 4-1.5 7.5-1.5"/></svg></div>
                 <div>
                     <div class="logo-text">Ocean<span>BI</span></div>
                     <div class="logo-sub">Intelligence System</div>
@@ -397,24 +397,24 @@
         <nav class="sidebar-nav">
             <div class="nav-label">Menu</div>
             <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <span class="nav-ico">🏠</span> Dashboard
+                <span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Dashboard
             </a>
             <a href="{{ route('datasets.index') }}" class="nav-item {{ request()->routeIs('datasets.*') ? 'active' : '' }}">
-                <span class="nav-ico">🗄️</span> Data Explorer
+                <span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></span> Data Explorer
             </a>
             <a href="{{ route('datasets.create') }}" class="nav-item">
-                <span class="nav-ico">⬆️</span> Upload Dataset
+                <span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></span> Upload Dataset
             </a>
             <div class="nav-label">Visualisasi</div>
 <a href="{{ route('ocean.mis') }}" class="nav-item {{ request()->routeIs('ocean.mis') ? 'active' : '' }}">
-    <span class="nav-ico">📊</span> MIS Dashboard
+    <span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> MIS Dashboard
 </a>
 <a href="{{ route('ocean.dss') }}" class="nav-item {{ request()->routeIs('ocean.dss') ? 'active' : '' }}">
-    <span class="nav-ico">⚠️</span> DSS Risk Analysis
+    <span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> DSS Risk Analysis
 </a>
             <div class="nav-label">Info</div>
             <div class="nav-item">
-                <span class="nav-ico">ℹ️</span> About Project
+                <span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span> About Project
             </div>
         </nav>
 
@@ -422,7 +422,7 @@
             <form method="POST" action="{{ route('logout') }}" class="logout-btn">
                 @csrf
                 <button type="submit" class="nav-item" style="width:100%;background:none;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;color:var(--text-muted);font-size:var(--fs-sm);">
-                    <span class="nav-ico">🚪</span> Logout
+                    <span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout
                 </button>
             </form>
             <div class="user-pill">

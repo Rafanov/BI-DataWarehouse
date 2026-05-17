@@ -98,7 +98,7 @@
     <div class="cc">
         <div class="cc-head">
             <div>
-                <div class="cc-title">🌊 Top 10 Kontributor Polusi Laut</div>
+                <div class="cc-title" style="display:flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.8"><path d="M2 12c1.5-3 3.5-4 6-4s4 2 6.5 2 4-1.5 7.5-1.5"/><path d="M2 17c1.5-3 3.5-4 6-4s4 2 6.5 2 4-1.5 7.5-1.5"/><path d="M2 7c1.5-3 3.5-4 6-4s4 2 6.5 2 4-1.5 7.5-1.5"/></svg> Top 10 Kontributor Polusi Laut</div>
                 <div class="cc-sub">Ocean pollution share per negara (2019)</div>
             </div>
             <div class="toggle-row" id="dss03-toggle">
@@ -115,7 +115,7 @@
     <div class="cc">
         <div class="cc-head">
             <div>
-                <div class="cc-title">⚠️ Distribusi Kategori Risiko</div>
+                <div class="cc-title" style="display:flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Distribusi Kategori Risiko</div>
                 <div class="cc-sub">Jumlah negara per level risiko</div>
             </div>
             <div class="toggle-row" id="dss01-toggle">
@@ -135,7 +135,7 @@
     <div class="cc">
         <div class="cc-head">
             <div>
-                <div class="cc-title">📊 Analisis Multivariat Risk Score</div>
+                <div class="cc-title" style="display:flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg> Analisis Multivariat Risk Score</div>
                 <div class="cc-sub">Komposisi & perbandingan indikator risiko</div>
             </div>
             <div class="toggle-row" id="dss02-toggle">
@@ -158,7 +158,7 @@
     <div class="cc">
         <div class="cc-head">
             <div>
-                <div class="cc-title">🎯 Profil Negara Prioritas</div>
+                <div class="cc-title" style="display:flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> Profil Negara Prioritas</div>
                 <div class="cc-sub">Perbandingan multi-indikator risiko</div>
             </div>
             <div class="toggle-row" id="dss04-toggle">
@@ -178,7 +178,7 @@
 <div class="cc" style="margin-bottom:12px;">
     <div class="cc-head">
         <div>
-            <div class="cc-title">📋 Daftar Negara Prioritas Mitigasi</div>
+            <div class="cc-title" style="display:flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg> Daftar Negara Prioritas Mitigasi</div>
             <div class="cc-sub">Berdasarkan DSS Risk Score — rekomendasi intervensi</div>
         </div>
         <div class="cc-tag">DSS OUTPUT</div>
@@ -727,10 +727,10 @@ function drawRadar(ctx, W, H) {
 ─────────────────────────────── */
 function buildPrioTable() {
     const RECS={
-        Critical:'🚨 Intervensi darurat — program nasional emergency',
-        High:'⚡ Mitigasi aktif — pendanaan World Bank direkomendasikan',
-        Medium:'📚 Edukasi & infrastruktur daur ulang',
-        Low:'✅ Pemantauan rutin — pertahankan sistem',
+        Critical:'Intervensi darurat — program nasional emergency',
+        High:'Mitigasi aktif — pendanaan World Bank direkomendasikan',
+        Medium:'Edukasi & infrastruktur daur ulang',
+        Low:'Pemantauan rutin — pertahankan sistem',
     };
     const maxScore=Math.max(...dss04Data.map(r=>parseFloat(r.risk_score)||0))||1;
     const html=`<table class="prio-tbl">

@@ -60,7 +60,7 @@
 
 /* Atlas */
 #atlas-mount { width:100%; height:360px; position:relative; overflow:hidden; border-radius:0 0 14px 14px; }
-#atlas-canvas { display:block; width:100%; height:100%; }
+#atlas-mount svg { display:block; width:100%; height:100%; }
 
 /* Bar rows */
 .bar-row   { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
@@ -123,9 +123,7 @@ canvas.cc  { display:block; width:100%; }
         </div>
 
         {{-- Atlas --}}
-        <div id="atlas-mount" style="display:none;">
-            <canvas id="atlas-canvas"></canvas>
-        </div>
+        <div id="atlas-mount" style="display:none;"></div>
     </div>
 
     {{-- MIS-03 Top 10 Mismanaged Per Kapita --}}
@@ -194,6 +192,9 @@ canvas.cc  { display:block; width:100%; }
 @push('scripts')
 {{-- Three.js dari CDN --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+{{-- D3 + TopoJSON untuk Atlas view --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════
    BASE URL untuk semua API fetch
@@ -805,59 +806,203 @@ async function loadGeo(indicator) {
 /* ═══════════════════════════════════════════
    ATLAS (2D flat map)
 ═══════════════════════════════════════════ */
-function drawAtlas() {
-    const c = document.getElementById('atlas-canvas');
-    if (!c || !geoData.length) return;
+/* ── Atlas state ── */
+let atlasWorld = null;   // cached TopoJSON world data
+let atlasInited = false;
+
+async function drawAtlas() {
     const mount = document.getElementById('atlas-mount');
-    const W = mount.clientWidth, H = mount.clientHeight;
-    c.width = W * Math.min(devicePixelRatio, 2);
-    c.height = H * Math.min(devicePixelRatio, 2);
-    const ctx = c.getContext('2d');
-    ctx.scale(Math.min(devicePixelRatio, 2), Math.min(devicePixelRatio, 2));
+    if (!mount || !geoData.length) return;
 
-    // Ocean bg
-    const og = ctx.createLinearGradient(0,0,0,H);
-    og.addColorStop(0,'#010b18'); og.addColorStop(1,'#04223c');
-    ctx.fillStyle=og; ctx.fillRect(0,0,W,H);
+    // Remove old SVG if exists
+    d3.select('#atlas-mount svg').remove();
 
-    // Grid
-    ctx.strokeStyle='rgba(56,189,248,0.06)'; ctx.lineWidth=0.5;
-    for(let lon=-180;lon<=180;lon+=30){const x=(lon+180)/360*W; ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-    for(let lat=-90;lat<=90;lat+=30){const y=(90-lat)/180*H; ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-    ctx.fillStyle='rgba(91,168,190,0.4)'; ctx.font='8px JetBrains Mono'; ctx.textAlign='left';
-    ['EQ','30°N','60°N','30°S','60°S'].forEach((l,i)=>{
-        const lats=[0,30,60,-30,-60];
-        ctx.fillText(l, 4, (90-lats[i])/180*H+3);
+    const W = mount.clientWidth;
+    const H = mount.clientHeight;
+
+    // Build value lookup from geoData
+    const valueMap = {};
+    geoData.forEach(r => {
+        const v = parseFloat(r[currentIndicator]);
+        if (!isNaN(v)) valueMap[r.entity] = v;
     });
 
-    // Continent outlines (rough polygons for visual context)
-    ctx.fillStyle='rgba(45,90,27,0.35)';
-    [[190,100,160,180],[240,250,110,190],[490,80,120,120],[500,180,140,220],
-     [680,80,330,180],[775,270,150,110]].forEach(([cx2,cy2,rw,rh])=>{
-        ctx.beginPath(); ctx.ellipse(cx2/1024*W, cy2/512*H, rw/1024*W, rh/512*H,0,0,Math.PI*2); ctx.fill();
-    });
+    const vals = Object.values(valueMap);
+    const mn = d3.min(vals), mx = d3.max(vals) || 1;
 
-    // Data points
-    const hasCoord = geoData.filter(r=>COORDS[r.entity]&&r[currentIndicator]!=null);
-    const vals = hasCoord.map(r=>parseFloat(r[currentIndicator]));
-    const mn=Math.min(...vals), mx=Math.max(...vals)||1;
+    // Color scale
+    const colorScale = currentIndicator === 'recycled_share'
+        ? d3.scaleSequential(d3.interpolateRdYlGn).domain([mn, mx])
+        : d3.scaleSequential(d3.interpolateYlOrRd).domain([mn, mx]);
 
-    hasCoord.sort((a,b)=>parseFloat(a[currentIndicator])-parseFloat(b[currentIndicator])).forEach(r=>{
-        const val=parseFloat(r[currentIndicator]);
-        const norm=(val-mn)/(mx-mn);
-        const [lat,lon]=COORDS[r.entity];
-        const x=(lon+180)/360*W, y=(90-lat)/180*H;
-        const radius=5+norm*16;
-        const col=`hsl(${currentIndicator==='recycled_share'?120-norm*100:norm*120},80%,${45+norm*20}%)`;
-        ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2);
-        ctx.fillStyle=col+'bb'; ctx.fill();
-        if(norm>0.5){
-            ctx.fillStyle='#e2f7ff'; ctx.font=`bold ${8+norm*3}px Space Grotesk`; ctx.textAlign='center';
-            ctx.fillText(r.entity.slice(0,10), x, y-radius-2);
+    // Projection — Natural Earth
+    const projection = d3.geoNaturalEarth1()
+        .scale(W / 6.3)
+        .translate([W / 2, H / 2]);
+
+    const path = d3.geoPath().projection(projection);
+
+    // SVG setup
+    const svg = d3.select('#atlas-mount')
+        .append('svg')
+        .attr('width', W)
+        .attr('height', H)
+        .style('display', 'block')
+        .style('background', 'linear-gradient(180deg,#010b18 0%,#04223c 100%)');
+
+    // Graticule (grid lines)
+    const graticule = d3.geoGraticule()();
+    svg.append('path')
+        .datum(graticule)
+        .attr('d', path)
+        .attr('fill', 'none')
+        .attr('stroke', 'rgba(56,189,248,0.08)')
+        .attr('stroke-width', 0.5);
+
+    // Load world TopoJSON once, then cache
+    if (!atlasWorld) {
+        try {
+            atlasWorld = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+        } catch(e) {
+            svg.append('text').attr('x', W/2).attr('y', H/2)
+               .attr('fill','#5ba8be').attr('text-anchor','middle')
+               .text('Gagal load peta — cek koneksi internet');
+            return;
         }
-    });
-    ctx.fillStyle='#5ba8be'; ctx.font='10px Space Grotesk'; ctx.textAlign='left';
-    ctx.fillText('Distribusi berdasarkan koordinat geografis negara', 8, H-8);
+    }
+
+    const countries = topojson.feature(atlasWorld, atlasWorld.objects.countries);
+
+    // Country name mapping (ISO numeric → name in our data)
+    // TopoJSON pakai ISO numeric ID, kita perlu lookup
+    const isoToName = {
+        4:'Afghanistan',8:'Albania',12:'Algeria',24:'Angola',32:'Argentina',
+        51:'Armenia',36:'Australia',40:'Austria',31:'Azerbaijan',50:'Bangladesh',
+        112:'Belarus',56:'Belgium',204:'Benin',68:'Bolivia',76:'Brazil',100:'Bulgaria',
+        854:'Burkina Faso',108:'Burundi',116:'Cambodia',120:'Cameroon',124:'Canada',
+        148:'Chad',152:'Chile',156:'China',170:'Colombia',174:'Comoros',188:'Costa Rica',
+        191:'Croatia',384:"Cote d'Ivoire",192:'Cuba',203:'Czechia',
+        180:'Democratic Republic of Congo',208:'Denmark',214:'Dominican Republic',
+        218:'Ecuador',818:'Egypt',222:'El Salvador',231:'Ethiopia',246:'Finland',
+        250:'France',266:'Gabon',276:'Germany',288:'Ghana',300:'Greece',320:'Guatemala',
+        324:'Guinea',328:'Guyana',332:'Haiti',340:'Honduras',348:'Hungary',
+        356:'India',360:'Indonesia',364:'Iran',368:'Iraq',372:'Ireland',380:'Italy',
+        388:'Jamaica',392:'Japan',400:'Jordan',398:'Kazakhstan',404:'Kenya',
+        434:'Libya',450:'Madagascar',454:'Malawi',458:'Malaysia',466:'Mali',
+        484:'Mexico',498:'Moldova',504:'Morocco',508:'Mozambique',104:'Myanmar',
+        524:'Nepal',528:'Netherlands',554:'New Zealand',558:'Nicaragua',562:'Niger',
+        566:'Nigeria',578:'Norway',586:'Pakistan',591:'Panama',598:'Papua New Guinea',
+        600:'Paraguay',604:'Peru',608:'Philippines',616:'Poland',620:'Portugal',
+        642:'Romania',643:'Russia',646:'Rwanda',682:'Saudi Arabia',686:'Senegal',
+        694:'Sierra Leone',706:'Somalia',710:'South Africa',410:'South Korea',
+        724:'Spain',144:'Sri Lanka',729:'Sudan',740:'Suriname',752:'Sweden',
+        756:'Switzerland',760:'Syria',158:'Taiwan',834:'Tanzania',764:'Thailand',
+        768:'Togo',780:'Trinidad and Tobago',788:'Tunisia',792:'Turkey',800:'Uganda',
+        804:'Ukraine',826:'United Kingdom',840:'United States',858:'Uruguay',
+        860:'Uzbekistan',862:'Venezuela',704:'Vietnam',887:'Yemen',
+        894:'Zambia',716:'Zimbabwe'
+    };
+
+    // Tooltip div
+    let tooltip = d3.select('#atlas-tooltip');
+    if (tooltip.empty()) {
+        tooltip = d3.select('body').append('div')
+            .attr('id', 'atlas-tooltip')
+            .style('position','fixed')
+            .style('background','rgba(3,15,30,0.92)')
+            .style('border','1px solid rgba(56,189,248,0.3)')
+            .style('border-radius','8px')
+            .style('padding','8px 12px')
+            .style('color','#e2f7ff')
+            .style('font-size','12px')
+            .style('font-family','Space Grotesk, sans-serif')
+            .style('pointer-events','none')
+            .style('display','none')
+            .style('z-index','9999');
+    }
+
+    const indicatorLabel = {
+        'ocean_pollution_share': 'Ocean Pollution Share',
+        'risk_score': 'Risk Score',
+        'mismanaged_per_capita': 'Mismanaged/Kapita (kg)',
+        'recycled_share': 'Recycling Rate'
+    };
+
+    // Draw countries
+    svg.selectAll('.country')
+        .data(countries.features)
+        .join('path')
+        .attr('class', 'country')
+        .attr('d', path)
+        .attr('fill', d => {
+            const name = isoToName[+d.id];
+            const val = valueMap[name];
+            return val != null ? colorScale(val) : 'rgba(30,60,90,0.5)';
+        })
+        .attr('stroke', 'rgba(56,189,248,0.15)')
+        .attr('stroke-width', 0.4)
+        .on('mousemove', function(event, d) {
+            const name = isoToName[+d.id];
+            const val = valueMap[name];
+            d3.select(this).attr('stroke','rgba(56,189,248,0.8)').attr('stroke-width', 1.2);
+            if (name) {
+                const fmt = val != null
+                    ? `<b>${name}</b><br>${indicatorLabel[currentIndicator]||currentIndicator}: <b>${
+                        currentIndicator==='ocean_pollution_share'||currentIndicator==='recycled_share'||currentIndicator==='mismanaged_share'
+                        ? (val*100).toFixed(2)+'%'
+                        : val.toFixed(2)
+                      }</b>`
+                    : `<b>${name}</b><br><span style="color:#5ba8be">Tidak ada data</span>`;
+                tooltip.style('display','block').html(fmt)
+                    .style('left', (event.clientX+12)+'px')
+                    .style('top',  (event.clientY-36)+'px');
+            }
+        })
+        .on('mouseleave', function() {
+            d3.select(this).attr('stroke','rgba(56,189,248,0.15)').attr('stroke-width', 0.4);
+            tooltip.style('display','none');
+        });
+
+    // Country borders (inner)
+    svg.append('path')
+        .datum(topojson.mesh(atlasWorld, atlasWorld.objects.countries, (a,b) => a !== b))
+        .attr('d', path)
+        .attr('fill', 'none')
+        .attr('stroke', 'rgba(56,189,248,0.12)')
+        .attr('stroke-width', 0.3);
+
+    // Legend
+    const legendW = 160, legendH = 10;
+    const lx = W - legendW - 16, ly = H - 36;
+
+    const defs = svg.append('defs');
+    const grad = defs.append('linearGradient').attr('id','atlas-legend-grad');
+    const stops = currentIndicator === 'recycled_share'
+        ? [['0%','#d73027'],['50%','#ffffbf'],['100%','#1a9850']]
+        : [['0%','#ffffb2'],['50%','#fd8d3c'],['100%','#800026']];
+    stops.forEach(([offset,color]) => grad.append('stop').attr('offset',offset).attr('stop-color',color));
+
+    svg.append('rect').attr('x',lx).attr('y',ly)
+        .attr('width',legendW).attr('height',legendH)
+        .attr('rx',3).attr('fill','url(#atlas-legend-grad)');
+
+    const fmtLegend = v => currentIndicator==='ocean_pollution_share'||currentIndicator==='recycled_share'
+        ? (v*100).toFixed(1)+'%' : v.toFixed(1);
+
+    svg.append('text').attr('x',lx).attr('y',ly-4)
+        .attr('fill','#5ba8be').attr('font-size','9px').attr('font-family','Space Grotesk, sans-serif')
+        .text(fmtLegend(mn));
+    svg.append('text').attr('x',lx+legendW).attr('y',ly-4)
+        .attr('fill','#5ba8be').attr('font-size','9px').attr('font-family','Space Grotesk, sans-serif')
+        .attr('text-anchor','end').text(fmtLegend(mx));
+    svg.append('text').attr('x',lx+legendW/2).attr('y',ly-4)
+        .attr('fill','#94b8cc').attr('font-size','9px').attr('font-family','Space Grotesk, sans-serif')
+        .attr('text-anchor','middle').text(indicatorLabel[currentIndicator]||currentIndicator);
+
+    // Caption
+    svg.append('text').attr('x',8).attr('y',H-8)
+        .attr('fill','rgba(91,168,190,0.6)').attr('font-size','9px').attr('font-family','Space Grotesk, sans-serif')
+        .text('Hover negara untuk detail · Data 2019');
 }
 
 /* ═══════════════════════════════════════════

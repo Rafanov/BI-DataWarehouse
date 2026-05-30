@@ -160,6 +160,9 @@ Parameter `indicator` untuk `/geo`: `ocean_pollution_share` | `mismanaged_per_ca
 ## 👥 Tim Pengembang
 
 Kelompok 6 — UAS Business Intelligence  
+1. Zyrus Alfredo Randan Malinggato - 2409116120
+2. Jen Agresia Misti - 2409116007
+3. Raihan Fariz N - 2409116083
 Program Studi Sistem Informasi, Universitas Mulawarman 2026
 
 ---

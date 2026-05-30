@@ -1,58 +1,169 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🌊 OceanBI — Ocean Plastic Intelligence System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem Business Intelligence berbasis web untuk analisis dan visualisasi data polusi plastik laut secara global. Dibangun sebagai proyek UAS Business Intelligence, Kelompok 6, Program Studi Sistem Informasi, Universitas Mulawarman 2026.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Deskripsi
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+OceanBI menggabungkan dua modul utama:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **MIS Dashboard** — Management Information System untuk monitoring tren produksi plastik, komposisi pengelolaan sampah, dan pemetaan polusi laut secara global (Globe 3D + Atlas 2D).
+- **DSS Risk Analysis** — Decision Support System untuk analisis risiko multi-variabel per negara, distribusi kategori risiko, dan rekomendasi prioritas mitigasi.
 
-## Learning Laravel
+Selain data ocean plastic statis, user juga bisa upload dataset CSV sendiri dan mendapatkan insight otomatis via **Gemini AI**.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ✨ Fitur Utama
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- 🌐 **Globe 3D Interaktif** — visualisasi Three.js dengan marker per negara berdasarkan indikator yang dipilih
+- 🗺️ **Atlas 2D** — peta choropleth berbasis D3.js + TopoJSON
+- 📊 **MIS Dashboard** — tren produksi plastik (1950–2019), komposisi waste fate, top 10 mismanaged per kapita
+- ⚠️ **DSS Risk Analysis** — distribusi risk category, multivariate analysis, profil negara prioritas dengan radar chart
+- 📁 **Dataset Manager** — upload CSV, preview data, metadata otomatis (row count, column count)
+- 🤖 **AI Insight** — generate insight & chart config otomatis via Gemini API per dataset
+- 🔐 **Auth** — register, login, logout dengan session management
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 🛠️ Tech Stack
+
+| Layer | Teknologi |
+|---|---|
+| Backend | Laravel 12 (PHP) |
+| Database utama | SQLite |
+| Database BI | SQLite (`ocean_plastic_dw.db`) |
+| Frontend | Blade, Vanilla JS, Canvas API |
+| Visualisasi | Three.js (Globe 3D), D3.js + TopoJSON (Atlas) |
+| CSV Parsing | `league/csv` |
+| AI Insight | Google Gemini API (`gemini-2.0-flash`) |
+| Styling | CSS Custom Properties (ocean dark theme) |
+| Auth | Laravel Breeze (session-based) |
+
+---
+
+## 🚀 Instalasi & Setup
+
+### Prasyarat
+
+- PHP >= 8.2
+- Composer
+- Node.js & npm (opsional, untuk build assets)
+
+### Langkah
 
 ```bash
-composer require laravel/boost --dev
+# 1. Clone repo
+git clone <repo-url>
+cd ocean-bi
 
-php artisan boost:install
+# 2. Install dependencies
+composer install
+
+# 3. Copy env dan generate key
+cp .env.example .env
+php artisan key:generate
+
+# 4. Konfigurasi .env
+# Set DB_CONNECTION=sqlite (default)
+# Tambahkan GEMINI_API_KEY untuk fitur AI Insight
+
+# 5. Migrasi database
+php artisan migrate
+
+# 6. (Opsional) Seed user default
+php artisan db:seed
+
+# 7. Jalankan server
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Database BI
 
-## Contributing
+Pastikan file `ocean_plastic_dw.db` ada di folder `database/`:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
+database/
+├── database.sqlite       ← dibuat otomatis saat migrate
+└── ocean_plastic_dw.db   ← taruh di sini (file terpisah)
+```
 
-## Code of Conduct
+File `ocean_plastic_dw.db` berisi data warehouse polusi plastik laut (tabel: `fact_production_trend`, `fact_waste_fate`, `fact_ocean_pollution`, `dim_country`, `dim_risk`).
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## ⚙️ Konfigurasi `.env`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```env
+APP_NAME=OceanBI
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost
 
-## License
+DB_CONNECTION=sqlite
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Untuk fitur AI Insight (opsional)
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Session & Cache (default database)
+SESSION_DRIVER=database
+CACHE_STORE=database
+```
+
+---
+
+## 📁 Struktur Direktori Penting
+
+```
+app/
+├── Http/Controllers/
+│   ├── DashboardController.php     # Dashboard overview + stats
+│   ├── DatasetController.php       # Upload, preview, AI insight CSV
+│   ├── ChartController.php         # Chart config & data API
+│   └── OceanBIController.php       # MIS & DSS API endpoints
+database/
+├── migrations/                     # Schema users, datasets, charts
+└── ocean_plastic_dw.db             # Data warehouse (taruh manual)
+resources/views/
+├── layouts/app.blade.php           # Layout utama + sidebar
+├── layouts/guest.blade.php         # Layout login/register (underwater canvas)
+├── dashboard.blade.php             # Dashboard CSV datasets
+└── ocean/
+    ├── mis.blade.php               # MIS Dashboard
+    └── dss.blade.php               # DSS Risk Analysis
+routes/web.php                      # Route auth + dashboard + ocean BI
+```
+
+---
+
+## 🔌 API Endpoints
+
+Semua endpoint ocean BI tersedia tanpa auth (untuk kebutuhan fetch dari frontend):
+
+| Method | Endpoint | Deskripsi |
+|---|---|---|
+| GET | `/api/ocean/kpi` | KPI summary (produksi, recycling rate, top polluter) |
+| GET | `/api/ocean/production` | Tren produksi plastik 1950–2019 |
+| GET | `/api/ocean/waste-fate` | Komposisi pengelolaan sampah per entitas |
+| GET | `/api/ocean/top-mismanaged` | Top 10 mismanaged per kapita |
+| GET | `/api/ocean/geo?indicator=X` | Data geografis per indikator |
+| GET | `/api/ocean/risk-dist` | Distribusi kategori risiko |
+| GET | `/api/ocean/multivariate` | Analisis multivariat top 20 negara |
+| GET | `/api/ocean/top-ocean` | Top 10 kontributor polusi laut |
+| GET | `/api/ocean/priority` | 15 negara prioritas mitigasi |
+
+Parameter `indicator` untuk `/geo`: `ocean_pollution_share` | `mismanaged_per_capita` | `recycled_share`
+
+---
+
+## 👥 Tim Pengembang
+
+Kelompok 6 — UAS Business Intelligence  
+Program Studi Sistem Informasi, Universitas Mulawarman 2026
+
+---
+
+## 📄 Lisensi
+
+MIT License
